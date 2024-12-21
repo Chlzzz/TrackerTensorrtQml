@@ -1,0 +1,20 @@
+<RCC>
+    <qresource prefix="/">
+        <file>qml/main.qml</file>
+        <file>assets/camera.png</file>
+        <file>assets/videocam.png</file>
+        <file>assets/settings.png</file>
+        <file>assets/profile.jpg</file>
+        <file>assets/ms_windows.png</file>
+        <file>assets/homepage.png</file>
+        <file>assets/home.png</file>
+        <file>assets/help.png</file>
+        <file>assets/Fredoka-VariableFont_wdth,wght.ttf</file>
+        <file>assets/file_select.png</file>
+        <file>assets/detectpage.png</file>
+        <file>assets/desktop.png</file>
+        <file>assets/dashboard.png</file>
+        <file>assets/arrow.png</file>
+        <file>assets/app_48.ico</file>
+    </qresource>
+</RCC>
