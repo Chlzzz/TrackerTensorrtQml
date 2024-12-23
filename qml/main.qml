@@ -201,6 +201,13 @@ Window {
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: barRect.right
             anchors.leftMargin: 5
+
+            HomePage {
+                id: homePage
+                visible: true
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.horizontalCenter: parent.horizontalCenter
+            }
         }
 
 

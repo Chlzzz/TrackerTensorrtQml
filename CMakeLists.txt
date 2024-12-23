@@ -14,10 +14,16 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Quick REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Quick REQUIRED)
 
+include_directories(
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+
 set(PROJECT_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/include/cpuinfer.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/utility.h
 
         ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/utility.cpp
         qml.qrc
 )
 
