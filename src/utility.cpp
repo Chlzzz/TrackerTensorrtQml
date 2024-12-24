@@ -84,5 +84,55 @@ void Utility::parseJSValue(QJSValue jsValue) {
     file->close();
 #endif
 
-
 }
+
+
+void Utility::handleRuntimeError(const QString error) {
+    this -> m_engine_init_status = false;
+    setErrorMessage(error);
+    qDebug() << "In function " << __FUNCTION__ << ", error is: " << error;
+}
+
+QString Utility::getErrorMessage() const {
+    return this -> m_error;
+}
+
+void Utility::setErrorMessage(const QString errorMessage) {
+    this -> m_error = errorMessage;
+    emit errorMessageChanged(this -> m_error);
+    qDebug() << "In function " << __FUNCTION__ << ", this -> m_error is: "
+             << this -> m_error << ", errorMessage is " << errorMessage;
+}
+
+void Utility::handleRuntimeSuccess() {
+    this -> m_engine_init_status = true;
+    setEngineStatus(this -> m_engine_init_status);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

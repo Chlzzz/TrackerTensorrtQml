@@ -16,14 +16,20 @@ find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Quick REQUIRED)
 
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${OpenCV_INCLUDE_DIRS}
+    ${InferenceEngine_INCLUDE_DIR}
 )
 
 set(PROJECT_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/include/cpuinfer.h
         ${CMAKE_CURRENT_SOURCE_DIR}/include/utility.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/ocvimageprovider.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/statusmonitor.h
 
         ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/utility.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/ocvimageprovider.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/statusmonitor.cpp
         qml.qrc
 )
 
