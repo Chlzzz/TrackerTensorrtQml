@@ -9,6 +9,11 @@
 #include <QHostInfo>
 #include <QTime>
 
+#include <stdio.h>
+#include <nmvl.h>
+
+
+
 #ifdef _DEBUG
     #include <QDebug>
 #endif
@@ -31,7 +36,7 @@ public:
 
     const int getCpuUsgaeThread();
     const int getMemUsageThread();
-    const int getNvidiaGpuUsageThread(const QString powershellScriptPath);
+    const int getNvidiaGpuUsageThread();
 
 signals:
     void resultReady(const int cpuUsage, const int memUsage, const int nvidiaGpuUsage);
@@ -41,7 +46,7 @@ public slots:
     void endMonitorProcess();
 
 protected:
-    int CompareTime(int preTime, int curTime);
+    size_t CompareTime(size_t preTime, size_t curTime);
 
 private:
     QString m_localMachineTime;

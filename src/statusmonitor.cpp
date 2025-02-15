@@ -2,7 +2,6 @@
 
 StatusMonitor::StatusMonitor(QObject* parent) :
     QObject(parent) {
-
     m_monitor_running = true;
     m_cpu_usage_thread = 0;
     m_mem_usage_thread = 0;
@@ -25,7 +24,7 @@ void StatusMonitor::monitorProcess() {
 }
 
 
-int StatusMonitor::CompareTime(int preTime, int curTime) {
+size_t StatusMonitor::CompareTime(size_t preTime, size_t curTime) {
     return curTime - preTime;
 }
 
