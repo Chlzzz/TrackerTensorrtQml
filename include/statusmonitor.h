@@ -9,14 +9,36 @@
 #include <QHostInfo>
 #include <QTime>
 
-#include <stdio.h>
-#include <nmvl.h>
-
-
+#include <iostream>
 
 #ifdef _DEBUG
     #include <QDebug>
 #endif
+
+
+// 内存信息结构体
+struct MemoryInfo {
+    unsigned long long total_memory; // MB
+    unsigned long long free_memory;  // MB
+};
+
+// CPU 信息结构体
+struct CPUInfo {
+    std::string name;
+    unsigned int cores;
+    unsigned int threads;
+    double usage; // CPU 使用率（百分比）
+};
+
+// GPU 信息结构体
+struct GPUInfo {
+    std::string name;
+    unsigned long total_memory; // MB
+    unsigned long free_memory;  // MB
+    double usage;
+};
+
+
 
 class StatusMonitor : public QObject {
     Q_OBJECT
@@ -28,15 +50,14 @@ public:
     // get system information
     Q_INVOKABLE const  QString localMachineName();
     Q_INVOKABLE const  QString cpuType();
-    Q_INVOKABLE const  QString intelGPU();
     Q_INVOKABLE const  QString nvidiaGPU();
     Q_INVOKABLE const  QString memory();
     Q_INVOKABLE const  QString osVersion();
-    Q_INVOKABLE const  QString intelGpuInfo();
 
-    const int getCpuUsgaeThread();
-    const int getMemUsageThread();
-    const int getNvidiaGpuUsageThread();
+    // 平台相关的函数声明
+    MemoryInfo get_memory_info();
+    CPUInfo get_cpu_info();
+    GPUInfo get_gpu_info();
 
 signals:
     void resultReady(const int cpuUsage, const int memUsage, const int nvidiaGpuUsage);
@@ -45,29 +66,22 @@ public slots:
     void monitorProcess();
     void endMonitorProcess();
 
-protected:
-    size_t CompareTime(size_t preTime, size_t curTime);
-
 private:
-    QString m_localMachineTime;
+    QString m_localMachineName;
     unsigned long long m_totalMem;
 
-    QString m_cpuDescripe;
+    QString m_cpuDescribe;
     QString m_memDescribe;
-    QString m_osDescirbe;
+    QString m_osDescribe;
 
-    int m_cpu_usage_thread;
-    int m_mem_usage_thread;
-    int m_nvidia_gpu_usage_thread;
+
+    MemoryInfo mem_m;
+    CPUInfo cpu_m;
+    GPUInfo gpu_m;
 
     bool m_monitor_running;
 
-    QString m_cl_info_path;
-
-    QString m_intel_gpu_opencl_info;
-
     QMutex mutex;
-    QString m_powershell_script_path;
 
 };
 

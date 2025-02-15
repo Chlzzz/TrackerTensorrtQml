@@ -11,6 +11,13 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# 检测操作系统并定义宏
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    add_definitions(-DUNIX)  # 定义 LINUX 宏
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    add_definitions(-DWIN32)  # 定义 WINDOWS 宏
+endif()
+
 find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Quick REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Quick REQUIRED)
 
@@ -19,6 +26,7 @@ include_directories(
     ${OpenCV_INCLUDE_DIRS}
     ${InferenceEngine_INCLUDE_DIR}
 )
+
 
 set(PROJECT_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/include/cpuinfer.h
@@ -30,6 +38,7 @@ set(PROJECT_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/src/utility.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/ocvimageprovider.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/statusmonitor.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/mymonitor.cpp
         qml.qrc
 )
 
@@ -59,11 +68,9 @@ endif()
 target_compile_definitions(${PROJECT_NAME}
   PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>)
 
-link_directories(/usr/lib/x86_64-linux-gnu)  # 指定库搜索路径
+
 target_link_libraries(${PROJECT_NAME}
-  nvidia-ml
-  Qt${QT_VERSION_MAJOR}::Core 
-  Qt${QT_VERSION_MAJOR}::Quick)
+    PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick)
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
