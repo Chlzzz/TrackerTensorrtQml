@@ -35,7 +35,8 @@ void StatusMonitor::monitorProcess() {
     #include <sys/utsname.h> // Linux/Unix 头文件
 
     // 获取内存信息
-    MemoryInfo get_memory_info() {
+    MemoryInfo StatusMonitor::get_memory_info() {
+        MemoryInfo info;
         std::ifstream meminfo("/proc/meminfo");
         std::unordered_map<std::string, unsigned long> memory_data;
         std::string line;
@@ -49,14 +50,14 @@ void StatusMonitor::monitorProcess() {
             memory_data[key] = value;
         }
 
-        return {
-            memory_data["MemTotal"] / 1024, // 总内存（MB）
-            memory_data["MemFree"] / 1024,   // 空闲内存（MB）
-        };
+        info.total_memory = memory_data["MemTotal"] / 1024;
+        info.free_memory = memory_data["MemFree"] / 1024;
+
+        return info;
     }
 
     // 获取 CPU 信息
-    CPUInfo get_cpu_info() {
+    CPUInfo StatusMonitor::get_cpu_info() {
         CPUInfo info;
 
         // 获取 CPU 名称
@@ -112,7 +113,7 @@ void StatusMonitor::monitorProcess() {
     }
 
     // 获取 GPU 信息（需要安装 NVIDIA 驱动和 nvidia-smi）
-    GPUInfo get_gpu_info() {
+    GPUInfo StatusMonitor::get_gpu_info() {
         GPUInfo info;
         std::string command = "nvidia-smi --query-gpu=name,memory.total,memory.free --format=csv,noheader,nounits";
         std::string result;

@@ -30,6 +30,26 @@ Item {
         }
 
         // functions
+//        Connections {
+//            target: controller
+//            function onCpuUsageChanged() {
+//                localCpuUsage.progress  = controller.getCpuUsage()
+//                localCpuUsage.requestPaint()
+//            }
+
+//            function onNvidiaGpuUsageChanged() {
+//                localGpuUsage1.progress = controller.getNvidiaGpuUsage()
+//                localGpuUsage1.requestPaint()
+//            }
+
+//            function onMemUsageChanged() {
+//                localCpuUsage.progress = controller.getMemUsage()
+//                localMemUsage.requestPaint();
+//            }
+//            Component.onDestruction: {
+//                controller.monitorThreadFinished()
+//            }
+//        }
 
 
         Rectangle {
@@ -97,7 +117,7 @@ Item {
                 x: 50
                 y: 46
                 width: 100
-                hright: 100
+                height: 100
                 source: "qrc:/assets/ms_windows.png"
             }
 
@@ -145,8 +165,8 @@ Item {
         Text {
             id: infoText
             text: qsTr("CPU:  " + statusMonitor.cpuType() + "\n" +
-                       "GPU0: " + statusMonitor.intelGPU() + "\n" +
-                       "GPU1: " + statusMonitor.nvidiaGPU())
+//                       "GPU0: " + statusMonitor.intelGPU() + "\n" +
+                       "GPU0: " + statusMonitor.nvidiaGPU())
             anchors.verticalCenterOffset: 181
             anchors.horizontalCenterOffset: 0
             anchors.centerIn: parent
@@ -171,7 +191,7 @@ Item {
                 x: 59
                 width: 75
                 height: 78
-                acrWidth: 5
+                arcWidth: 5
                 radius: 30
                 anchors.top: parent.top
                 anchors.topMargin: 21

@@ -14,7 +14,7 @@ Window {
     minimumWidth: 1280
     minimumHeight: 800
     visible: true
-    title: qsTr("Fusion Network demo Tool")
+    title: qsTr("NerualNetwork Tool")
 
     property bool unfold: false;
 
