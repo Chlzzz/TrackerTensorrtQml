@@ -18,8 +18,8 @@
 
 // 内存信息结构体
 struct MemoryInfo {
-    unsigned long long total_memory; // MB
-    unsigned long long free_memory;  // MB
+    unsigned long long total_memory; // GB
+    unsigned long long free_memory;  // GB
 };
 
 // CPU 信息结构体
@@ -27,7 +27,7 @@ struct CPUInfo {
     std::string name;
     unsigned int cores;
     unsigned int threads;
-    double usage; // CPU 使用率（百分比）
+    unsigned int usage; // CPU 使用率（百分比）
 };
 
 // GPU 信息结构体
@@ -35,7 +35,7 @@ struct GPUInfo {
     std::string name;
     unsigned long total_memory; // MB
     unsigned long free_memory;  // MB
-    double usage;
+    unsigned int usage;
 };
 
 

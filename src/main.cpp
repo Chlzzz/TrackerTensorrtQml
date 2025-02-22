@@ -2,11 +2,12 @@
 #include <QQmlApplicationEngine>
 #include <QIcon>
 #include <QQmlContext>
+#include <QWidget>
 
+#include "imageprocess.h"
 #include "ocvimageprovider.h"
+#include "threadcontroller.h"
 #include "utility.h"
-#include "statusmonitor.h"
-
 
 int main(int argc, char *argv[])
 {
@@ -15,9 +16,17 @@ int main(int argc, char *argv[])
 #endif
     QGuiApplication app(argc, argv);
 
+    // Initialize utility for some additional pasering, then transfet to ThreadController
     Utility *utility = new Utility();
-    OCVImageProvider *ocvImageProvider = new OCVImageProvider;
+
+    // Initialize the ImageProvider, and transfer to the ThreadController
+    OCVImageProvider *ocvImageProvider = new OCVImageProvider();
+
+    // Initialize statusMoinitor for monitoring usage of some hardwares, also pass to ThreadController
     StatusMonitor *statusMonitor = new StatusMonitor();
+
+    // Initialize the thread to do our work
+    ThreadController *controller = new ThreadController(nullptr, ocvImageProvider, statusMonitor, utility);
 
     QQmlApplicationEngine engine;
     const QUrl url(QStringLiteral("qrc:/qml/main.qml"));

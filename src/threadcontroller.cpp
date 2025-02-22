@@ -3,10 +3,10 @@
 ThreadController::ThreadController(QObject* parent, OCVImageProvider* imageProvider,
     StatusMonitor* statusMonitor, Utility* utility) : QObject(parent) {
     
-    //imageProcess = new ImageProcess();
+    imageProcess = new ImageProcess();
     statusMonitor = new StatusMonitor();
 
-    //imageProcess->moveToThread(&readingThread);
+    imageProcess->moveToThread(&readingThread);
     statusMonitor -> moveToThread(&monitorThread);
 
     connect(this, SIGNAL(startMonitorProcess()), statusMonitor, SLOT(monitorProcess()));
@@ -14,13 +14,13 @@ ThreadController::ThreadController(QObject* parent, OCVImageProvider* imageProvi
     // have to use 'Qt::ConnectionType::DirectConnection', otherwise connect wont work
     // DirectConnection，槽函数立即在发送信号的线程中执行
     connect(this, SIGNAL(monitorThreadExit()), statusMonitor, SLOT(endMonitorProcess()), Qt::ConnectionType::DirectConnection); 
-    connect(&monitorThread, QThread::finished, statusMonitor, &QObject::deleteLater);
+    connect(&monitorThread, &QThread::finished, statusMonitor, &QObject::deleteLater);
     connect(statusMonitor, &StatusMonitor::resultReady, this, &ThreadController::handleResult);
 
-    // connect(this, SIGNAL(operateImageThread()), imageProcess, SLOTS(updateImage(QImage)));
+    connect(this, SIGNAL(operateImageThread(int)), imageProcess, SLOT(readFrame()));
     // connect(this, SIGNAL(imageProcessExit()), imageProcess, SLOT(endCapture()), Qt::ConnectionType::DirectConnection);
     // connect(&readingThread, &QThread::finished, imageProcess, &QObject::deleteLater);
-    // connect(imageProcess, SIGNAL(sendImage(QImage)), imageProvider, SLOT(updateImage(QImage)));
+    connect(imageProcess, SIGNAL(sendImage(QImage)), imageProvider, SLOT(updateImage(QImage)));
 
     // // check the parameters...
     // connect(utility, &Utility::sendToThread, imageProcess, &ImageProcess::checkInferParameter, Qt::ConnectionType::DirectConnection);
@@ -57,7 +57,7 @@ ThreadController::~ThreadController() {
 
 void ThreadController::monitorThreadFinished(){
 #ifdef _DEBUG
-    qDebug() << "Called " << _FUNCTION__ << ", exiting thread... ";
+    qDebug() << "Called " << __FUNCTION__ << ", exiting thread... ";
 #endif
     emit monitorThreadExit();
 }
@@ -69,7 +69,7 @@ void ThreadController::imageThreadStart(){
 
 void ThreadController::imageThreadFinished(){
 #ifdef _DEBUG
-    qDebug() << "Called " << _FUNCTION__ << ", exiting thread... ";
+    qDebug() << "Called " << __FUNCTION__ << ", exiting thread... ";
 #endif
     emit imageProcessExit();
 }

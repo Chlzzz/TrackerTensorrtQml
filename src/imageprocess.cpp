@@ -52,10 +52,10 @@ QImage ImageProcess::MatImageToQImage(const cv::Mat& src) {
     return returnImage;
 }
 
-void ImageProcess::initCapture(const int cameraIndex = 0, const double capWidth = 640,
+void ImageProcess::initCapture(const std::string cameraIndex = "RGB", const double capWidth = 640,
     const double capHeight = 480) {
 #ifdef USE_VIDEO
-    cap.open("../video/demo.mp4");
+    cap.open("./video/output.avi");
 #else
     cap.open(cameraIndex, cv::CAP_DSHOW);
     cap.set(cv::CAP_PROP_FRAME_WIDTH, capWidth);
@@ -90,15 +90,103 @@ void ImageProcess::readFrame() {
             break;
         } 
         else {
-            if(m_yolo_running) {
-            //     cv::Mat yolo_frame = infer->startInfer(m_frame);
-            //     m_q_image = MatImageToQImage(yolo_frame);
-            //     emit sendImage(m_q_image);
-            // } else {
-            //     m_q_image = MatImageToQImage(m_frame);
-            //     emit sendImage(m_q_image);
+            if(false) {
+                 //cv::Mat yolo_frame = infer->startInfer(m_frame);
+                 //m_q_image = MatImageToQImage(yolo_frame);
+                 //emit sendImage(m_q_image);
+            } else {
+                 m_q_frame = MatImageToQImage(m_frame);
+                 emit sendImage(m_q_frame);
             }
         }
     }
     cap.release();
 }
+
+
+void ImageProcess::startCapture() {
+    m_image_process_running = true;
+}
+
+void ImageProcess::endCapture() {
+    QMutexLocker locker(&mutex);
+    m_image_process_running = false;
+}
+
+// void ImageProcess::checkInferParameter(QVector<int> capturePara, QStringList inferPara) {
+// #ifdef _DEBUG
+//     qDebug() << "Received signal sendToThread, checking parameters now, in function " << __FUNCTION__;
+// #endif
+//     m_camera_index = capturePara[0]; 
+//     m_capture_width =capturePara[1];
+//     m_capture_height = capturePara[2];
+    
+//     QString m_infer_device = inferPara[0];
+//     QString m_yolo_network_dir = inferPara[1];
+//     QString m_yolo_model_size = inferPara[2];
+   
+//     QStringList switchList;
+//     switchList << "nano" << "tiny" << "small" << "medium" << "large";
+//     // got to check the file
+//     // I hate if... so switch case is used.
+//     if(m_infer_device == "Intel CPU"){
+//         switch(switchList.indexOf(m_yolo_model_size)){
+//             case 1:
+//                 m_full_network_path = m_yolo_network_dir + "/" + "yolox_tiny.xml";
+// #ifdef _DEBUG
+//                 qDebug() << "yolox tiny file path: " << m_full_network_path;
+// #endif
+//                 break;
+//             case 2:
+//                 m_full_network_path = m_yolo_network_dir + "/" + "yolox_s.xml";
+// #ifdef _DEBUG
+//                 qDebug() << "yolox small file path: " << m_full_network_path;
+// #endif
+//                 break;
+//             case 3:
+//                 m_full_network_path = m_yolo_network_dir + "/" + "yolox_m.xml";
+// #ifdef _DEBUG
+//                 qDebug() << "yolox medium file path: " << m_full_network_path;
+// #endif
+//                 break;
+//             case 4:
+//                 m_full_network_path = m_yolo_network_dir + "/" + "yolox_l.xml";
+// #ifdef _DEBUG
+//                 qDebug() << "yolox large file path: " << m_full_network_path;
+// #endif
+//                 break;
+//             default:
+//                 m_full_network_path = m_yolo_network_dir + "/" + "yolox_nano.xml";
+// #ifdef _DEBUG
+//                 qDebug() << "default yolox nano file path: " << m_full_network_path;
+// #endif
+//                 break;
+
+//              // check if the file exsits...
+//         }
+//         QFileInfo fileInfo(m_full_network_path);
+//         if(!fileInfo.exists()) {
+//             m_yolo_running = false;
+// #ifdef _DEBUG
+//             QString m_error_infer_device = "Error, unable to locate yolo network file.\n";
+//             qDebug() << m_error_infer_device;
+// #endif
+//             runtime_error = "Error, unable to locate yolo network file.";
+//             emit sendInferDeviceError(runtime_error);
+//             return ;
+//         } 
+//         else {
+//             // If nothing happened, our camera and engine will init here...
+//             infer->initEngine(m_full_network_path.toStdString(), "CPU");
+//             emit sendInferDeviceSuccess();
+//         }
+//         // else {
+
+//         //     // do something
+//         // }
+//     }
+// }
+
+// void ImageProcess::changeYoloDetectStatus(){
+//     m_yolo_running = !m_yolo_running;
+// }

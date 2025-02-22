@@ -4,7 +4,7 @@
 
 #include <QObject>
 #include "statusmonitor.h"
-//#include "imageprocess.h"
+#include "imageprocess.h"
 #include "ocvimageprovider.h"
 #include "utility.h"
 
@@ -50,7 +50,7 @@ public slots:
     //void startYoloDetect();
 
 private:
-    //ImageProcess *imageProcess;
+    ImageProcess *imageProcess;
 
     int m_cpu_usage;
     int m_mem_usage;

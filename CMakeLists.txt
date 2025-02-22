@@ -22,7 +22,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     add_definitions(-DWIN32)  # 定义 WINDOWS 宏
 endif()
-
+add_definitions(-DUSE_VIDEO)
 
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 

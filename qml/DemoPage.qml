@@ -49,7 +49,7 @@ Item {
                 // Reload image
                 function reload(){
                     source = ""
-                    source = "image://live/image/" + Date.now()
+                    source = "qrc:/assets/ir_img.png"
 
                 }
                 // Set default image
@@ -68,16 +68,16 @@ Item {
             anchors.left: canvas.right
             anchors.leftMargin: 20
 
-            property var paraList : {
-                "camera_index": 0,
-                "resolution": {
-                    "width": 640,
-                    "height": 480,
-                },
-                "infer_device": "Intel CPU",
-                "yolo_network_directory": "./",
-                "yolo_model_size": "nano"
-            }
+            // property var paraList : {
+            //     "camera_index": RGB,
+            //     "resolution": {
+            //         "width": 640,
+            //         "height": 480,
+            //     },
+            //     "infer_device": "Intel CPU",
+            //     "network_directory": "./",
+            //     "model_size": "nano"
+            // }
 
             function stringifyAndSend(paraList){
                 var jsonString = JSON.stringify(paraList)
@@ -100,7 +100,7 @@ Item {
             }
 
             ComboBox {
-                property int camIndex: 0
+                property string camIndex: "RGB"
                 id: camIndexSelect
                 width: 120
                 anchors.verticalCenter: cameraText.verticalCenter
@@ -108,34 +108,24 @@ Item {
                 anchors.leftMargin: 42
                 font.pixelSize: 12
                 font.family: "Fredoka Light"
-                model:[0,1,2,3,4,5]
-                onDisplayTextChanged: {
-                    switch(displayText){
-                    case '1':
-                        camIndex = 1
-                        break;
-                    case '2':
-                        camIndex = 2
-                        break;
-                    case '3':
-                        camIndex = 3
-                        break;
-                    case '4':
-                        camIndex = 4
-                        break;
-                    case '5':
-                        camIndex = 5
-                        break;
-                    default:
-                        camIndex = 0
-                        console.log("Default camera index is 0 !")
-                        break;
-                    }
-                    // Init our json data here
-                    controlPanel.paraList["camera_index"] =  camIndex
+                model:["RGB", "IR"]
+                // onDisplayTextChanged: {
+                //     switch(displayText){
+                //     case "RGB":
+                //         camIndex = "RGB"
+                //         break;
+                //     case "IR":
+                //         camIndex = "IR"
+                //         break;
+                //     default:
+                //         camIndex = "RGB"
+                //         console.log("Default camera index is RGB !")
+                //         break;
+                //     }
+                //      //Init our json data here
+                //     controlPanel.paraList["camera_index"] =  camIndex
 
-                }
-
+                // }
             }
 
             Text {
@@ -150,18 +140,29 @@ Item {
             }
 
             ComboBox {
+                property int m_width: 640
+                property int m_height: 480
                 id: resSelect
                 width: 120
                 anchors.verticalCenter: resText.verticalCenter
                 anchors.horizontalCenter: camIndexSelect.horizontalCenter
                 font.pixelSize: 12
                 font.family: "Fredoka Light"
-                model:["640×480"]
-                onDisplayTextChanged: {
-                    controlPanel.paraList["resolution"]["width"] = 640
-                    controlPanel.paraList["resolution"]["height"] = 480
-
-                }
+                model:["640×480", "384×288"]
+                // onDisplayTextChanged: {
+                //     switch(displayText){
+                //     case "640×480":
+                //         m_width = 640
+                //         m_height = 480
+                //         break;
+                //     case "384×288":
+                //         m_width = 384
+                //         m_height = 288
+                //         break;
+                //     }
+                //     controlPanel.paraList["resolution"]["width"] = m_width
+                //     controlPanel.paraList["resolution"]["height"] = m_height
+                // }
             }
 
             Text {
@@ -184,14 +185,14 @@ Item {
                 font.pixelSize: 12
                 font.family: "Fredoka Light"
                 model: ["Intel CPU", "Nvidia GPU"]
-                onDisplayTextChanged: {
-                    controlPanel.paraList["infer_device"] = displayText
-                }
+                // onDisplayTextChanged: {
+                //     controlPanel.paraList["infer_device"] = displayText
+                // }
             }
 
             Text {
-                id: yolov5NetworkText
-                text: qsTr("Yolov5 network file directory")
+                id: networkText
+                text: qsTr("Network file directory")
                 anchors.left: parent.left
                 anchors.top: inferDeviceText.bottom
                 font.pixelSize: 14
@@ -201,11 +202,11 @@ Item {
             }
 
             Text {
-                id: yolov5NetworkDir
+                id: networkDir
                 width: 220
                 height: 20
                 anchors.left: parent.left
-                anchors.top: yolov5NetworkText.bottom
+                anchors.top: networkText.bottom
                 anchors.leftMargin: 10
                 anchors.topMargin: 40
                 font.pixelSize: 12
@@ -227,8 +228,8 @@ Item {
                 id: selectFile
                 width: 24
                 height: 24
-                anchors.verticalCenter: yolov5NetworkDir.verticalCenter
-                anchors.left: yolov5NetworkDir.right
+                anchors.verticalCenter: networkDir.verticalCenter
+                anchors.left: networkDir.right
                 source: "qrc:/assets/file_select.png"
                 anchors.leftMargin: 10
                 fillMode: Image.PreserveAspectFit
@@ -243,14 +244,14 @@ Item {
             }
             FolderDialog {
                 id: networkFolderDialog
-//                property string url: ""
+                property string url: ""
                 onAccepted: {
                     var url = networkFolderDialog.folder
-                    yolov5NetworkDir.text = url.toString().slice(8)
-                    controlPanel.paraList["yolo_network_directory"] = url.toString().slice(8)
+                    networkDir.text = url.toString().slice(8)
+                    controlPanel.paraList["network_directory"] = url.toString().slice(8)
                 }
                 onRejected: {
-                    yolov5NetworkDir.text = qsTr("Must provide a valid folder path...")
+                    networkDir.text = qsTr("Must provide a valid folder path...")
                 }
             }
 
@@ -258,7 +259,7 @@ Item {
                 id: modelSizeText
                 text: qsTr("Model Size")
                 anchors.left: parent.left
-                anchors.top: yolov5NetworkDir.bottom
+                anchors.top: networkDir.bottom
                 font.pixelSize: 14
                 font.family: "Fredoka Light"
                 anchors.leftMargin: 10
@@ -272,10 +273,10 @@ Item {
                 anchors.horizontalCenter: inferDevide.horizontalCenter
                 font.pixelSize: 12
                 font.family: "Fredoka Light"
-                model: ["nano", "tiny", "small", "medium", "large"]
-                onDisplayTextChanged: {
-                    controlPanel.paraList["yolo_model_size"] = displayText
-                }
+                model: ["nano", "tiny"]
+                // onDisplayTextChanged: {
+                //     controlPanel.paraList["model_size"] = displayText
+                // }
             }
 
             Button {
@@ -348,11 +349,14 @@ Item {
             anchors.horizontalCenter: canvas.horizontalCenter
             anchors.topMargin: 40
 
-            Button {
+            ToolButton {
                 id: startCaptureBtn
                 height: 50
-                enabled: false
-                text: qsTr("Start Capture")
+                background: Rectangle {
+                        color: "lightgray"
+                    }
+//                enabled: false
+                text: qsTr("START CAPTURE")
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.left: parent.left
                 font.pixelSize: 14
@@ -363,11 +367,11 @@ Item {
                     start_capture = !start_capture
                     if(start_capture){
                         console.log("Start Capture...")
-                        text = qsTr("End Capture")
+                        text = qsTr("END CAPTURE")
                         controller.imageThreadStart()
                     } else {
                         console.log("End Capture...")
-                        text = qsTr("Start Capture")
+                        text = qsTr("START CAPTURE")
                         controller.imageThreadFinished()
                         delayTimer.start() // set to default img
                     }
@@ -375,47 +379,54 @@ Item {
 
             }
 
-            Button {
-                id: startYoloBtn
+            ToolButton {
+                id: startNetWorkBtn
                 height: 50
-                text: qsTr("Start Yolo Detection")
+                background: Rectangle {
+                        color: "lightgray"
+                    }
+                text: qsTr("START DETECTION")
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.left: startCaptureBtn.right
+                anchors.leftMargin: 40
                 font.pixelSize: 14
                 font.family: "Fredoka Light"
-                flat: false
-                anchors.leftMargin: 20
-                enabled: false                  // default false
-                property bool run_yolo: false
+//                flat: false
+//                enabled: false                  // default false
+                property bool run_model: false
                 onClicked: {
-                    run_yolo = !run_yolo
-                    if(run_yolo){
-                        console.log("Starting Yolo...")
-                        text = qsTr("End Yolo Detection")
+                    run_model = !run_model
+                    if(run_model){
+                        console.log("Starting Model...")
+                        text = qsTr("END DETECTION")
                     } else {
-                        console.log("Ending Yolo...")
-                        text = qsTr("Start Yolo Detection")
+                        console.log("Ending Model...")
+                        text = qsTr("START DETECTION")
                     }
 
-                    controller.startYoloDetect()
+                    //controller.startYoloDetect()
                 }
             }
 
-            Button {
+            ToolButton {
                 id: startDemoBtn
                 height: 50
-                text: qsTr("Start Demo")
+                background: Rectangle {
+                        color: "lightgray"
+                    }
+                text: qsTr("START DEMO")
                 anchors.verticalCenter: parent.verticalCenter
-                anchors.left: startYoloBtn.right
-                anchors.leftMargin: 20
+                anchors.left: startNetWorkBtn.right
+                anchors.leftMargin: 40
                 font.pixelSize: 14
                 font.family: "Fredoka Light"
-                enabled: false
+//                enabled: false
                 onClicked: {
 
                 }
             }
         }
+
     }
 
     Behavior on visible {
@@ -458,8 +469,6 @@ Item {
         }
     }
 }
-
-
 
 /*##^##
 Designer {

@@ -18,8 +18,7 @@ void StatusMonitor::monitorProcess() {
         mem_m = get_memory_info();
         gpu_m = get_gpu_info();
         cpu_m = get_cpu_info();
-
-        emit resultReady(cpu_m.usage, mem_m.free_memory / mem_m.total_memory * 100.0, gpu_m.usage);
+        emit resultReady(cpu_m.usage, mem_m.total_memory, gpu_m.usage);
         if(!m_monitor_running) 
             break;
     }
@@ -31,6 +30,8 @@ void StatusMonitor::monitorProcess() {
     #include <sstream>
     #include <unordered_map>
     #include <thread>
+    #include <cstdlib>
+    #include <string>
     #include <chrono>
     #include <sys/utsname.h> // Linux/Unix 头文件
 
@@ -41,17 +42,18 @@ void StatusMonitor::monitorProcess() {
         std::unordered_map<std::string, unsigned long> memory_data;
         std::string line;
 
-        while (std::getline(meminfo, line)) {
+        for(int i = 0; i < 2; ++i) {
+            std::getline(meminfo, line);
             std::istringstream iss(line);
             std::string key;
-            unsigned long value;
+            unsigned long long value;
             iss >> key >> value;
             key.pop_back(); // 去掉末尾的冒号
             memory_data[key] = value;
         }
 
-        info.total_memory = memory_data["MemTotal"] / 1024;
-        info.free_memory = memory_data["MemFree"] / 1024;
+        info.total_memory = memory_data["MemTotal"] >> 20;
+        info.free_memory = memory_data["MemFree"] >> 20;
 
         return info;
     }
@@ -128,14 +130,15 @@ void StatusMonitor::monitorProcess() {
         }
 
         if (!result.empty()) {
-            std::istringstream iss(result);
-            std::string name;
-            unsigned long total_memory, free_memory;
-            iss >> name >> total_memory >> free_memory;
-            info.name = name;
-            info.total_memory = total_memory;
-            info.free_memory = free_memory;
-            info.usage = free_memory / total_memory * 100.0;
+            int locs =  0;
+            int loce = 0;
+            locs = result.find(',', 0);
+            info.name = result.substr(0, locs);
+            loce = result.find(',', locs + 1);
+            info.total_memory = std::stol(result.substr(locs + 1, loce));
+            info.free_memory = std::stol(result.substr(loce + 1, sizeof(result)));
+            unsigned long sub = info.total_memory - info.free_memory;
+            info.usage =  sub * 100 / info.total_memory;
         }
 
         return info;
@@ -249,13 +252,15 @@ void StatusMonitor::monitorProcess() {
         }
 
         if (!result.empty()) {
-            std::istringstream iss(result);
-            std::string name;
-            unsigned long total_memory, free_memory;
-            iss >> name >> total_memory >> free_memory;
-            info.name = name;
-            info.total_memory = total_memory;
-            info.free_memory = free_memory;
+            int locs =  0;
+            int loce = 0;
+            locs = result.find(',', 0);
+            info.name = result.substr(0, locs);
+            loce = result.find(',', locs + 1);
+            info.total_memory = std::stol(result.substr(locs + 1, loce));
+            info.free_memory = std::stol(result.substr(loce + 1, sizeof(result)));
+            unsigned long sub = info.total_memory - info.free_memory;
+            info.usage =  sub * 100 / info.total_memory;
         }
 
         return info;

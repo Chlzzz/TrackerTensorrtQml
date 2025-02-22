@@ -40,7 +40,7 @@ Window {
             anchors.left: parent.left
             anchors.leftMargin: 20
             z: 1
-            y: 10
+//            y: 10
             color: "#f5f5f5";
             clip: true
 
@@ -208,9 +208,34 @@ Window {
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.horizontalCenter: parent.horizontalCenter
             }
+            DemoPage {
+                id: demoPage
+                visible: false
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.horizontalCenter: parent.horizontalCenter
+            }
+
+            CalibratePage {
+                id: calibratePage
+                visible: false
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.horizontalCenter: parent.horizontalCenter
+            }
+
+            InfoPage {
+                id: infoPage
+                visible: false
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.horizontalCenter: parent.horizontalCenter
+            }
+
+            SettingPage{
+                id: settingsPage
+                visible: false
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.horizontalCenter: parent.horizontalCenter
+            }
+
         }
-
-
-
     }
 }

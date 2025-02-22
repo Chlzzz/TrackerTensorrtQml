@@ -29,7 +29,7 @@ public:
     ~ImageProcess();
 
     QImage MatImageToQImage(const cv::Mat& src);
-    void initCapture(const int cameraIndex, const double capWidth, const double capHeight);
+    void initCapture(const std::string cameraIndex, const double capWidth, const double capHeight);
 
 signals:
     void sendImage(const QImage&);
@@ -42,8 +42,8 @@ public slots:
     void readFrame();
     void endCapture();
 
-    void checkInferParameter(QVecInt capturePara, QStringList inferPara);
-    void changeYoloDectecStatus();
+//    void checkInferParameter(QVecInt capturePara, QStringList inferPara);
+//    void changeYoloDectecStatus();
 
 private:
     QMutex mutex;
@@ -57,11 +57,11 @@ private:
     bool m_yolo_running;
     bool m_full_demo_running;
 
-    int m_camera_index;
+    std::string m_camera_index;
     int m_capture_width;
     int m_capture_height;
 
-    QString m_network_path;
+    QString m_full_network_path;
     QString runtime_error;
 
     // CPUInfer *infer;

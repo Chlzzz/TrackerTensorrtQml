@@ -30,32 +30,33 @@ Item {
         }
 
         // functions
-//        Connections {
-//            target: controller
-//            function onCpuUsageChanged() {
-//                localCpuUsage.progress  = controller.getCpuUsage()
-//                localCpuUsage.requestPaint()
-//            }
+        Connections {
+            target: controller
+            function onCpuUsageChanged() {
+                localCpuUsage.progress  = controller.getCpuUsage()
+                localCpuUsage.requestPaint()
+            }
 
-//            function onNvidiaGpuUsageChanged() {
-//                localGpuUsage1.progress = controller.getNvidiaGpuUsage()
-//                localGpuUsage1.requestPaint()
-//            }
+            function onNvidiaGpuUsageChanged() {
+                localGpuUsage1.progress = controller.getNvidiaGpuUsage()
+                localGpuUsage1.requestPaint()
+            }
 
-//            function onMemUsageChanged() {
-//                localCpuUsage.progress = controller.getMemUsage()
-//                localMemUsage.requestPaint();
-//            }
-//            Component.onDestruction: {
-//                controller.monitorThreadFinished()
-//            }
-//        }
+            function onMemUsageChanged() {
+                localCpuUsage.progress = controller.getMemUsage()
+                localMemUsage.requestPaint();
+            }
+            Component.onDestruction: {
+                controller.monitorThreadFinished()
+            }
+        }
 
 
         Rectangle {
             id: memCard
             x: 325
             width: 150
+            height: 150
             color: "#fe6169"
             radius: 20
             anchors.top: cpuCard.bottom
@@ -66,6 +67,7 @@ Item {
                 x: 598
                 y: 83
                 anchors.centerIn: parent
+                arcWidth: 5
                 radius: 30
                 anchors.verticalCenterOffset: -27
                 anchors.horizontalCenterOffset: 1
@@ -165,7 +167,6 @@ Item {
         Text {
             id: infoText
             text: qsTr("CPU:  " + statusMonitor.cpuType() + "\n" +
-//                       "GPU0: " + statusMonitor.intelGPU() + "\n" +
                        "GPU0: " + statusMonitor.nvidiaGPU())
             anchors.verticalCenterOffset: 181
             anchors.horizontalCenterOffset: 0
@@ -177,7 +178,7 @@ Item {
         }
 
         Rectangle {
-            id: cpuCarg
+            id: cpuCard
             x: 276
             y: 31
             width: 150
@@ -281,7 +282,7 @@ Item {
 
                 onClicked: {
                     intelGpuDialogPopup.open()
-                    intelGpuDialog.innerText = statusMonitor.intelGpuInfo()
+                    intelGpuDialog.innerText = "wait..."//statusMonitor.intelGpuInfo()
                 }
             }
         }
