@@ -16,27 +16,27 @@
 #endif
 
 
-// 内存信息结构体
-struct MemoryInfo {
-    unsigned long long total_memory; // GB
-    unsigned long long free_memory;  // GB
-};
+//// 内存信息结构体
+//struct MemoryInfo {
+//    uint8_t total_memory; // GB
+//    uint8_t free_memory;  // GB
+//};
 
-// CPU 信息结构体
-struct CPUInfo {
-    std::string name;
-    unsigned int cores;
-    unsigned int threads;
-    unsigned int usage; // CPU 使用率（百分比）
-};
+//// CPU 信息结构体
+//struct CPUInfo {
+//    std::string name;
+//    unsigned int cores;
+//    unsigned int threads;
+//    unsigned int usage; // CPU 使用率（百分比）
+//};
 
-// GPU 信息结构体
-struct GPUInfo {
-    std::string name;
-    unsigned long total_memory; // MB
-    unsigned long free_memory;  // MB
-    unsigned int usage;
-};
+//// GPU 信息结构体
+//struct GPUInfo {
+//    std::string name;
+//    uint16_t total_memory; // MB
+//    uint16_t free_memory;  // MB
+//    unsigned int usage;
+//};
 
 
 
@@ -55,9 +55,9 @@ public:
     Q_INVOKABLE const  QString osVersion();
 
     // 平台相关的函数声明
-    MemoryInfo get_memory_info();
-    CPUInfo get_cpu_info();
-    GPUInfo get_gpu_info();
+    uint8_t get_memory_usage();
+    uint8_t get_cpu_usage();
+    uint8_t get_gpu_usage();
 
 signals:
     void resultReady(const int cpuUsage, const int memUsage, const int nvidiaGpuUsage);
@@ -72,12 +72,12 @@ private:
 
     QString m_cpuDescribe;
     QString m_memDescribe;
-    QString m_osDescribe;
+    QString m_osDescribe; 
+    QString m_gpuDescribe;
 
-
-    MemoryInfo mem_m;
-    CPUInfo cpu_m;
-    GPUInfo gpu_m;
+    int m_cpu_usage_thread;
+    int m_mem_usage_thread;
+    int m_nvidia_gpu_usage_thread;
 
     bool m_monitor_running;
 

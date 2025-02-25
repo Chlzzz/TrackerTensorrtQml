@@ -25,5 +25,6 @@
         <file>qml/DemoPage.qml</file>
         <file>qml/InfoPage.qml</file>
         <file>qml/SettingPage.qml</file>
+        <file>assets/ms_ubuntu.png</file>
     </qresource>
 </RCC>

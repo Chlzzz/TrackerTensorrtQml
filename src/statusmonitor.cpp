@@ -15,10 +15,10 @@ StatusMonitor::~StatusMonitor() {
 
 void StatusMonitor::monitorProcess() {
     while(m_monitor_running){
-        mem_m = get_memory_info();
-        gpu_m = get_gpu_info();
-        cpu_m = get_cpu_info();
-        emit resultReady(cpu_m.usage, mem_m.total_memory, gpu_m.usage);
+        m_mem_usage_thread = get_memory_usage();
+        m_nvidia_gpu_usage_thread = get_gpu_usage();
+        m_cpu_usage_thread = get_cpu_usage();
+        emit resultReady(m_cpu_usage_thread, m_mem_usage_thread, m_nvidia_gpu_usage_thread);
         if(!m_monitor_running) 
             break;
     }
@@ -36,49 +36,31 @@ void StatusMonitor::monitorProcess() {
     #include <sys/utsname.h> // Linux/Unix 头文件
 
     // 获取内存信息
-    MemoryInfo StatusMonitor::get_memory_info() {
-        MemoryInfo info;
-        std::ifstream meminfo("/proc/meminfo");
-        std::unordered_map<std::string, unsigned long> memory_data;
-        std::string line;
-
-        for(int i = 0; i < 2; ++i) {
-            std::getline(meminfo, line);
-            std::istringstream iss(line);
-            std::string key;
-            unsigned long long value;
-            iss >> key >> value;
-            key.pop_back(); // 去掉末尾的冒号
-            memory_data[key] = value;
+    uint8_t StatusMonitor::get_memory_usage() {
+        QProcess process;
+        QStringList arguments;
+        arguments << "-m";
+        process.start("free", arguments); //使用free完成获取
+        process.waitForFinished();
+        process.readLine();
+        QString str = process.readLine();
+        str.replace("\n","");
+        str.replace(QRegExp("( ){1,}")," ");//将连续空格替换为单个空格 用于分割
+        auto lst = str.split(" ");
+        if(lst.size() > 6) {
+            //qDebug("mem total:%.0lfMB free:%.0lfMB",lst[1].toDouble(),lst[6].toDouble());
+            uint16_t nMemTotal = lst[1].toUShort() >> 10;
+            uint16_t sub_nMemFree = nMemTotal - (lst[6].toUShort() >> 10);
+            m_mem_usage_thread = sub_nMemFree * 100/ nMemTotal;
+            return m_mem_usage_thread ;
         }
-
-        info.total_memory = memory_data["MemTotal"] >> 20;
-        info.free_memory = memory_data["MemFree"] >> 20;
-
-        return info;
+        else {
+            return false;
+        }
     }
 
     // 获取 CPU 信息
-    CPUInfo StatusMonitor::get_cpu_info() {
-        CPUInfo info;
-
-        // 获取 CPU 名称
-        std::ifstream cpuinfo("/proc/cpuinfo");
-        std::string line;
-        while (std::getline(cpuinfo, line)) {
-            if (line.find("model name") != std::string::npos) {
-                size_t colon_pos = line.find(":");
-                if (colon_pos != std::string::npos) {
-                    info.name = line.substr(colon_pos + 2); // 去掉冒号和空格
-                    break;
-                }
-            }
-        }
-
-        // 获取 CPU 核心数和线程数
-        info.cores = std::thread::hardware_concurrency();
-        info.threads = info.cores;
-
+    uint8_t StatusMonitor::get_cpu_usage() {
         // 获取 CPU 使用率
         auto get_cpu_stats = []() -> std::unordered_map<std::string, unsigned long> {
             std::ifstream stat_file("/proc/stat");
@@ -109,14 +91,14 @@ void StatusMonitor::monitorProcess() {
         unsigned long total_diff = curr_total - prev_total;
         unsigned long idle_diff = curr_idle - prev_idle;
 
-        info.usage = (total_diff - idle_diff) * 100.0 / total_diff;
+        double usage = (total_diff - idle_diff) * 100.0 / total_diff;
 
-        return info;
+        return usage;
     }
 
     // 获取 GPU 信息（需要安装 NVIDIA 驱动和 nvidia-smi）
-    GPUInfo StatusMonitor::get_gpu_info() {
-        GPUInfo info;
+    uint8_t StatusMonitor::get_gpu_usage() {
+
         std::string command = "nvidia-smi --query-gpu=name,memory.total,memory.free --format=csv,noheader,nounits";
         std::string result;
 
@@ -133,15 +115,12 @@ void StatusMonitor::monitorProcess() {
             int locs =  0;
             int loce = 0;
             locs = result.find(',', 0);
-            info.name = result.substr(0, locs);
             loce = result.find(',', locs + 1);
-            info.total_memory = std::stol(result.substr(locs + 1, loce));
-            info.free_memory = std::stol(result.substr(loce + 1, sizeof(result)));
-            unsigned long sub = info.total_memory - info.free_memory;
-            info.usage =  sub * 100 / info.total_memory;
+            long total_memory = std::stol(result.substr(locs + 1, loce - locs - 1)) >> 10;
+            long free_memory = std::stol(result.substr(loce + 1)) >> 10;
+            int sub = total_memory - free_memory;
+            return sub * 100 / total_memory;
         }
-
-        return info;
     }
 
     // 获取 OS 信息
@@ -262,7 +241,9 @@ void StatusMonitor::monitorProcess() {
             unsigned long sub = info.total_memory - info.free_memory;
             info.usage =  sub * 100 / info.total_memory;
         }
-
+        MemoryInfo mem_m;
+        CPUInfo cpu_m;
+        GPUInfo gpu_m;
         return info;
     }
 
@@ -304,16 +285,62 @@ const QString StatusMonitor::localMachineName(){
 }
 
 const QString StatusMonitor::cpuType() {
-    m_cpuDescribe = QString::fromStdString(cpu_m.name);
+    // 获取 CPU 名称
+    std::ifstream cpuinfo("/proc/cpuinfo");
+    std::string line;
+    std::string cpu_name;
+    while (std::getline(cpuinfo, line)) {
+        if (line.find("model name") != std::string::npos) {
+            size_t colon_pos = line.find(":");
+            if (colon_pos != std::string::npos) {
+                cpu_name = line.substr(colon_pos + 2); // 去掉冒号和空格
+                break;
+            }
+        }
+    }
+    m_cpuDescribe = QString::fromStdString(cpu_name);
     return m_cpuDescribe;
 }
 
+
 const QString StatusMonitor::nvidiaGPU() {
-    return QString::fromStdString(gpu_m.name);
+    std::string command = "nvidia-smi --query-gpu=name,memory.total,memory.free --format=csv,noheader,nounits";
+    std::string result;
+
+    FILE* pipe = popen(command.c_str(), "r");
+    if (pipe) {
+        char buffer[128];
+        while (fgets(buffer, sizeof(buffer), pipe) != nullptr) {
+            result += buffer;
+        }
+        pclose(pipe);
+    }
+
+    //if (!result.empty()) {
+        int locs =  0;
+        int loce = 0;
+        locs = result.find(',', 0);
+        m_gpuDescribe = QString::fromStdString(result.substr(0, locs));
+        return m_gpuDescribe;
+    //}
+
 }
 
 const QString StatusMonitor::memory() {
-    std::string mem = std::to_string(mem_m.total_memory);
-    m_memDescribe = QString::fromStdString(mem);
-    return m_memDescribe;
+    QProcess process;
+    QStringList arguments;
+    arguments << "-m";
+    process.start("free", arguments); //使用free完成获取
+    process.waitForFinished();
+    process.readLine();
+    QString str = process.readLine();
+    str.replace("\n","");
+    str.replace(QRegExp("( ){1,}")," ");//将连续空格替换为单个空格 用于分割
+    auto lst = str.split(" ");
+    //if(lst.size() > 6) {
+        //qDebug("mem total:%.0lfMB free:%.0lfMB",lst[1].toDouble(),lst[6].toDouble());
+        int med = lst[1].toUShort() >> 10;
+        m_memDescribe = QString::number(med);
+        return m_memDescribe;
+    //}
 }

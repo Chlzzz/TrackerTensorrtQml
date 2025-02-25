@@ -43,7 +43,7 @@ Item {
             }
 
             function onMemUsageChanged() {
-                localCpuUsage.progress = controller.getMemUsage()
+                localMemUsage.progress = controller.getMemUsage()
                 localMemUsage.requestPaint();
             }
             Component.onDestruction: {
@@ -109,10 +109,11 @@ Item {
             y: 31
             width: 200
             height: 300
-            color: "#46b2ff"
+            color: "#F5672B" //"#46b2ff"
             radius: 20
             anchors.right: cpuCard.left
             anchors.rightMargin: 10
+
 
             Image {
                 id: platformImage
@@ -120,7 +121,16 @@ Item {
                 y: 46
                 width: 100
                 height: 100
-                source: "qrc:/assets/ms_windows.png"
+                property string osImage: statusMonitor.osVersion()
+                source: {
+                    if(osImage.indexOf("ubuntu")){
+                        "qrc:/assets/ms_ubuntu.png"
+                    }
+                    else {
+                        "qrc:/assets/ms_windows.png"
+                        rectangle.color = "#46b2ff"
+                    }
+                }
             }
 
             Text {
@@ -151,31 +161,6 @@ Item {
             }
         }
 
-        Text {
-            x: 296
-            y: 64
-            text: qsTr("System Information")
-            anchors.bottom: infoText.top
-            anchors.bottomMargin: 11
-            anchors.horizontalCenterOffset: 0;
-            font.family: "Fredoka Light"
-            font.pointSize: 18
-            font.weight: Font.Bold
-        }
-
-
-        Text {
-            id: infoText
-            text: qsTr("CPU:  " + statusMonitor.cpuType() + "\n" +
-                       "GPU0: " + statusMonitor.nvidiaGPU())
-            anchors.verticalCenterOffset: 181
-            anchors.horizontalCenterOffset: 0
-            anchors.centerIn: parent
-            font.family: "Fredoka Light"
-            font.pointSize: 12
-            font.weight: Font.Bold
-
-        }
 
         Rectangle {
             id: cpuCard
@@ -224,7 +209,7 @@ Item {
             y: 31
             width: 145
             height: 140
-            color: "#202529"
+            color: "#767681"
             radius: 20
             anchors.left: cpuCard.right
             anchors.leftMargin: 15
@@ -317,7 +302,7 @@ Item {
                 width: 47
                 height: 15
                 color: "#ffffff"
-                text: qsTr("GPU1")
+                text: qsTr("GPU")
                 anchors.top: localGpuUsage1.bottom
                 font.pixelSize: 14
                 horizontalAlignment: Text.AlignHCenter
@@ -350,6 +335,34 @@ Item {
                 anchors.fill: parent
             }
         }
+
+
+        Text {
+            x: 296
+            y: 64
+            text: qsTr("System Information")
+            anchors.bottom: infoText.top
+            anchors.bottomMargin: 11
+            anchors.horizontalCenterOffset: 0;
+            font.family: "Fredoka Light"
+            font.pointSize: 18
+            font.weight: Font.Bold
+        }
+
+
+        Text {
+            id: infoText
+            text: qsTr("CPU:  " + statusMonitor.cpuType() + "\n" +
+                       "GPU: " + statusMonitor.nvidiaGPU())
+            anchors.verticalCenterOffset: 181
+            anchors.horizontalCenterOffset: 0
+            anchors.centerIn: parent
+            font.family: "Fredoka Light"
+            font.pointSize: 12
+            font.weight: Font.Bold
+
+        }
+
 
     }
 
