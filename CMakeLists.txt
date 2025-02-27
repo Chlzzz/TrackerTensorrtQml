@@ -22,12 +22,12 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     add_definitions(-DWIN32)  # 定义 WINDOWS 宏
 endif()
-add_definitions(-DUSE_VIDEO)
+#add_definitions(-DUSE_VIDEO)
 
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin)
 
 #set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_CURRENT_SOURCE_DIR}/iconwin/app.rc")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_VIDEO")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_VIDEO")
 
 #set(CMAKE_PREFIX_PATH /opt/openvino/runtime)
 

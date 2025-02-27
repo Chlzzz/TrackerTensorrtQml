@@ -18,8 +18,8 @@ ThreadController::ThreadController(QObject* parent, OCVImageProvider* imageProvi
     connect(statusMonitor, &StatusMonitor::resultReady, this, &ThreadController::handleResult);
 
     connect(this, SIGNAL(operateImageThread(int)), imageProcess, SLOT(readFrame()));
-    // connect(this, SIGNAL(imageProcessExit()), imageProcess, SLOT(endCapture()), Qt::ConnectionType::DirectConnection);
-    // connect(&readingThread, &QThread::finished, imageProcess, &QObject::deleteLater);
+    connect(this, SIGNAL(imageProcessExit()), imageProcess, SLOT(endCapture()), Qt::ConnectionType::DirectConnection);
+    connect(&readingThread, &QThread::finished, imageProcess, &QObject::deleteLater);
     connect(imageProcess, SIGNAL(sendImage(QImage)), imageProvider, SLOT(updateImage(QImage)));
 
     // // check the parameters...

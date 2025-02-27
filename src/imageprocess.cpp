@@ -52,12 +52,13 @@ QImage ImageProcess::MatImageToQImage(const cv::Mat& src) {
     return returnImage;
 }
 
-void ImageProcess::initCapture(const std::string cameraIndex = "RGB", const double capWidth = 640,
+void ImageProcess::initCapture(const std::string cameraIndex = "0", const double capWidth = 640,
     const double capHeight = 480) {
 #ifdef USE_VIDEO
     cap.open("./video/output.avi");
 #else
-    cap.open(cameraIndex, cv::CAP_DSHOW);
+    cap.open(0, cv::CAP_V4L2);
+    //cap = cv::VideoCapture(0);
     cap.set(cv::CAP_PROP_FRAME_WIDTH, capWidth);
     cap.set(cv::CAP_PROP_FRAME_HEIGHT, capHeight);
 #endif
@@ -77,7 +78,7 @@ void ImageProcess::initCapture(const std::string cameraIndex = "RGB", const doub
 }
 
 void ImageProcess::readFrame() {
-    initCapture(m_camera_index, m_capture_width, m_capture_height);
+    initCapture();
     while(m_image_process_running) {
         cap.read(m_frame);
 #ifdef USE_VIDEO

@@ -49,8 +49,7 @@ Item {
                 // Reload image
                 function reload(){
                     source = ""
-                    source = "qrc:/assets/ir_img.png"
-
+                    source = "image://live/image/" + Date.now()
                 }
                 // Set default image
                 function setDefault(){
@@ -100,7 +99,7 @@ Item {
             }
 
             ComboBox {
-                property string camIndex: "RGB"
+                property string camIndex: '0'
                 id: camIndexSelect
                 width: 120
                 anchors.verticalCenter: cameraText.verticalCenter
@@ -108,24 +107,36 @@ Item {
                 anchors.leftMargin: 42
                 font.pixelSize: 12
                 font.family: "Fredoka Light"
-                model:["RGB", "IR"]
-                // onDisplayTextChanged: {
-                //     switch(displayText){
-                //     case "RGB":
-                //         camIndex = "RGB"
-                //         break;
-                //     case "IR":
-                //         camIndex = "IR"
-                //         break;
-                //     default:
-                //         camIndex = "RGB"
-                //         console.log("Default camera index is RGB !")
-                //         break;
-                //     }
-                //      //Init our json data here
-                //     controlPanel.paraList["camera_index"] =  camIndex
+                model:["rtsp", 0,1,2,3,4,5]
+                onDisplayTextChanged: {
+                    switch(displayText){
+                    case '1':
+                        camIndex = "1"
+                        break;
+                    case '2':
+                        camIndex = "2"
+                        break;
+                    case '3':
+                        camIndex = "3"
+                        break;
+                    case '4':
+                        camIndex = "4"
+                        break;
+                    case '5':
+                        camIndex = "5"
+                        break;
+                    case "rtsp":
+                        camIndex = "rtsp"
+                        break;
+                    default:
+                        camIndex = "0"
+                        console.log("Default camera index is 0 !")
+                        break;
+                    }
+                    // Init our json data here
+                    //controlPanel.paraList["camera_index"] =  camIndex
 
-                // }
+                }
             }
 
             Text {

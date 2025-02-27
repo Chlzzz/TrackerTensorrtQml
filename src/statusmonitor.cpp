@@ -6,6 +6,7 @@
 /// @param parent 
 StatusMonitor::StatusMonitor(QObject *parent) :
     QObject(parent){
+
     m_monitor_running = true;
 }
 
