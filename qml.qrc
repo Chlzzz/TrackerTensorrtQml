@@ -20,7 +20,6 @@
         <file>qml/HomePage.qml</file>
         <file>qml/CircleProgress.qml</file>
         <file>qml/CalibratePage.qml</file>
-        <file>../yolov5-RGBD/qml/InfoPage.qml</file>
         <file>qml/CustomDialog.qml</file>
         <file>qml/DemoPage.qml</file>
         <file>qml/InfoPage.qml</file>

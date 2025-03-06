@@ -2,3 +2,7 @@
 build
 bin
 video
+workerspace
+lib
+rtdetr-l.FP32.trtmodel
+qml_rc.py

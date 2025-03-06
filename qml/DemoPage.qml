@@ -67,16 +67,16 @@ Item {
             anchors.left: canvas.right
             anchors.leftMargin: 20
 
-            // property var paraList : {
-            //     "camera_index": RGB,
-            //     "resolution": {
-            //         "width": 640,
-            //         "height": 480,
-            //     },
-            //     "infer_device": "Intel CPU",
-            //     "network_directory": "./",
-            //     "model_size": "nano"
-            // }
+            property var paraList : {
+                "camera_index": RGB,
+                "resolution": {
+                    "width": 640,
+                    "height": 480,
+                },
+                "infer_device": "Intel CPU",
+                "network_directory": "./",
+                "model_type": "nano"
+            }
 
             function stringifyAndSend(paraList){
                 var jsonString = JSON.stringify(paraList)
@@ -292,12 +292,10 @@ Item {
                     if(validParameter){
                         console.log("Successfully found the files, you may begin to detect")
                         startCaptureBtn.enabled = true
-                        startYoloBtn.enabled = true
-                        startDemoBtn.enabled = true
+                        startNetWorkBtn.enabled = true
                     } else {
                         console.log("Error: Requested files cannot be found.")
-                        startYoloBtn.enabled = false
-                        startDemoBtn.enabled = false
+                        startNetWorkBtn.enabled = false
                         startCaptureBtn.enabled = false
                     }
                 }
@@ -331,7 +329,7 @@ Item {
 
         ToolBar {
             id: toolBar
-            width: 480
+            width: 300
             height: 60
             position: ToolBar.Footer
             anchors.top: canvas.bottom
@@ -344,12 +342,12 @@ Item {
                 background: Rectangle {
                         color: "lightgray"
                     }
-//                enabled: false
+                enabled: false
                 text: qsTr("START CAPTURE")
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.left: parent.left
                 font.pixelSize: 14
-                font.family: "Fredoka Light"
+                font.family: "Fredoka Light" 
                 anchors.leftMargin: 10
                 property bool start_capture: false
                 onClicked: {
@@ -365,7 +363,6 @@ Item {
                         delayTimer.start() // set to default img
                     }
                 }
-
             }
 
             ToolButton {
@@ -374,44 +371,25 @@ Item {
                 background: Rectangle {
                         color: "lightgray"
                     }
-                text: qsTr("START DETECTION")
+                text: qsTr("START MODEL")
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.left: startCaptureBtn.right
                 anchors.leftMargin: 40
                 font.pixelSize: 14
                 font.family: "Fredoka Light"
-//                flat: false
-//                enabled: false                  // default false
+                flat: false
+                enabled: false                  // default false
                 property bool run_model: false
                 onClicked: {
                     run_model = !run_model
                     if(run_model){
                         console.log("Starting Model...")
-                        text = qsTr("END DETECTION")
+                        text = qsTr("END MODEL")
                     } else {
                         console.log("Ending Model...")
-                        text = qsTr("START DETECTION")
+                        text = qsTr("START MODEL")
                     }
-
-                    //controller.startYoloDetect()
-                }
-            }
-
-            ToolButton {
-                id: startDemoBtn
-                height: 50
-                background: Rectangle {
-                        color: "lightgray"
-                    }
-                text: qsTr("START DEMO")
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.left: startNetWorkBtn.right
-                anchors.leftMargin: 40
-                font.pixelSize: 14
-                font.family: "Fredoka Light"
-//                enabled: false
-                onClicked: {
-
+                    controller.startModelDetect()
                 }
             }
         }
