@@ -2,8 +2,9 @@
 #define IMAGEPROCESS_H_
 
 
-#include <QObject>
+
 #include <QImage>
+#include <QObject>
 #include <QMutex>
 #include <QMutexLocker>
 #include <QImage>
@@ -15,6 +16,7 @@
 #include <opencv2/highgui.hpp>
 
 #include "utility.h"
+#include "app_rtdetr.h"
 
 #ifdef _DEBUG
     #include <QDebug>
@@ -42,8 +44,10 @@ public slots:
     void readFrame();
     void endCapture();
 
-//    void checkInferParameter(QVecInt capturePara, QStringList inferPara);
-//    void changeYoloDectecStatus();
+    void initengine();
+
+    void checkInferParameter(QVecInt capturePara, QStringList inferPara);
+    void changeNNStatus();
 
 private:
     QMutex mutex;
@@ -54,7 +58,7 @@ private:
     QImage m_q_frame;
 
     bool m_image_process_running;
-    bool m_yolo_running;
+    bool m_nn_running;
     bool m_full_demo_running;
 
     std::string m_camera_index;
@@ -65,6 +69,7 @@ private:
     QString runtime_error;
 
     // CPUInfer *infer;
+    std::shared_ptr<AppRTdetr> m_infer;
     
 };
 

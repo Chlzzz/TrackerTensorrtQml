@@ -107,35 +107,13 @@ Item {
                 anchors.leftMargin: 42
                 font.pixelSize: 12
                 font.family: "Fredoka Light"
-                model:["rtsp", 0,1,2,3,4,5]
-                onDisplayTextChanged: {
-                    switch(displayText){
-                    case '1':
-                        camIndex = "1"
-                        break;
-                    case '2':
-                        camIndex = "2"
-                        break;
-                    case '3':
-                        camIndex = "3"
-                        break;
-                    case '4':
-                        camIndex = "4"
-                        break;
-                    case '5':
-                        camIndex = "5"
-                        break;
-                    case "rtsp":
-                        camIndex = "rtsp"
-                        break;
-                    default:
-                        camIndex = "0"
-                        console.log("Default camera index is 0 !")
-                        break;
-                    }
-                    // Init our json data here
-                    //controlPanel.paraList["camera_index"] =  camIndex
+                model: ["0", "1", "2", "3", "4", "5","rtsp"]
 
+                onDisplayTextChanged: {
+                    camIndex = cameraMap[displayText];
+//                    if (camIndex === "0") {
+//                        console.log("Default camera index is 0 !");
+//                    }
                 }
             }
 
@@ -268,7 +246,7 @@ Item {
 
             Text {
                 id: modelSizeText
-                text: qsTr("Model Size")
+                text: qsTr("Task Type")
                 anchors.left: parent.left
                 anchors.top: networkDir.bottom
                 font.pixelSize: 14
@@ -284,9 +262,9 @@ Item {
                 anchors.horizontalCenter: inferDevide.horizontalCenter
                 font.pixelSize: 12
                 font.family: "Fredoka Light"
-                model: ["nano", "tiny"]
+                model: ["Detection", "Tracking", "Fusion"]
                 // onDisplayTextChanged: {
-                //     controlPanel.paraList["model_size"] = displayText
+                //     controlPanel.paraList["Task Type"] = displayText
                 // }
             }
 

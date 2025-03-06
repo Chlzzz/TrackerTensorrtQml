@@ -112,8 +112,10 @@ void StatusMonitor::monitorProcess() {
             pclose(pipe);
         }
 
-        if (!result.empty()) {
-            int locs =  0;
+        if (result.empty()) {
+           return 0;
+        }
+        int locs =  0;
             int loce = 0;
             locs = result.find(',', 0);
             loce = result.find(',', locs + 1);
@@ -121,7 +123,6 @@ void StatusMonitor::monitorProcess() {
             long free_memory = std::stol(result.substr(loce + 1)) >> 10;
             int sub = total_memory - free_memory;
             return sub * 100 / total_memory;
-        }
     }
 
     // 获取 OS 信息

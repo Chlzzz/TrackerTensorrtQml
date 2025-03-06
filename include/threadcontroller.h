@@ -35,7 +35,7 @@ signals:
         void memUsageChanged(const int memUsage);
         void nvidiaGpuUsageChanged(const int nvidiaGpuUsage);
 
-        //void sendYoloStart();
+        void sendModelStart();
 
 public slots:
     void monitorThreadFinished();
@@ -47,7 +47,7 @@ public slots:
     void setMemUsage(const int memUsage);
     void setNvidiaGpuUsage(const int nvidiaGpuUsage);
 
-    //void startYoloDetect();
+    void startModelDetect();
 
 private:
     ImageProcess *imageProcess;

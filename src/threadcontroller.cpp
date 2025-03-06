@@ -23,10 +23,13 @@ ThreadController::ThreadController(QObject* parent, OCVImageProvider* imageProvi
     connect(imageProcess, SIGNAL(sendImage(QImage)), imageProvider, SLOT(updateImage(QImage)));
 
     // // check the parameters...
-    // connect(utility, &Utility::sendToThread, imageProcess, &ImageProcess::checkInferParameter, Qt::ConnectionType::DirectConnection);
+    //connect(utility, &Utility::sendToThread, imageProcess, &ImageProcess::checkInferParameter, Qt::ConnectionType::DirectConnection);
 
-    // // start yolo
-    // connect(this, &ThreadController::sendYoloStart, imageProcess, &ImageProcess::changeYoloDetectStatus, Qt::ConnectionType::DirectConnection);
+    //  infer engine init...
+    connect(utility, &Utility::sendToThread, imageProcess, &ImageProcess::initengine, Qt::ConnectionType::DirectConnection);
+
+    // // start infer model
+    connect(this, &ThreadController::sendModelStart, imageProcess, &ImageProcess::changeNNStatus, Qt::ConnectionType::DirectConnection);
 
     // // TODO: send error message when init engine
     // // sender: imageProcess
@@ -35,12 +38,13 @@ ThreadController::ThreadController(QObject* parent, OCVImageProvider* imageProvi
     // // slot: handleError
     // // handleError will write error message
     // // In GUI, just call utility.getEngineStatus() to receive error message
-    // connect(imageProcess, &ImageProcess::sendCameraError, utility, &Utility::handleRuntimeError);
-    // connect(imageProcess, &ImageProcess::sendInferDeviceError, utility, &Utility::handleRuntimeError);
+
+    connect(imageProcess, &ImageProcess::sendCameraError, utility, &Utility::handleRuntimeError);
+    connect(imageProcess, &ImageProcess::sendInferDeviceError, utility, &Utility::handleRuntimeError);
 
     // // sender: imageProcess, signal: sendInferDeviceSuccess
     // // receiver: utility, slot: handleRuntimeSuccess
-    // connect(imageProcess, &ImageProcess::sendInferDeviceSuccess, utility, &Utility::handleRuntimeSuccess);
+    connect(imageProcess, &ImageProcess::sendInferDeviceSuccess, utility, &Utility::handleRuntimeSuccess);
     monitorThread.start();
     emit startMonitorProcess();
 }
@@ -120,6 +124,6 @@ void ThreadController::setNvidiaGpuUsage(const int nvidiaGpuUsage){
     }
 }
 
-// void ThreadController::startYoloDetect() {
-//     emit sendYoloStart();
-// }
+void ThreadController::startModelDetect() {
+    emit sendModelStart();
+}

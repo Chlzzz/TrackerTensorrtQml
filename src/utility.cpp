@@ -42,8 +42,8 @@ void Utility::parseJSValue(QJSValue jsValue) {
     int captureWidth = resolutionObject.value("width").toInt();
     int captureHeight = resolutionObject.value("height").toInt();
     QString inferDevice = jsonObject.value("infer_device").toString();
-    QString yoloNetworkDir = jsonObject.value("yolo_network_directory").toString();
-    QString yoloModelSize = jsonObject.value("yolo_model_size").toString();
+    QString NetworkDir = jsonObject.value("network_directory").toString();
+    QString ModelType = jsonObject.value("model_type").toString();
 
     QVector<int> capturePara;
     capturePara.push_back(cameraIndex);
@@ -52,8 +52,8 @@ void Utility::parseJSValue(QJSValue jsValue) {
 
     QStringList inferPara;
     inferPara.push_back(inferDevice);
-    inferPara.push_back(yoloNetworkDir);
-    inferPara.push_back(yoloModelSize);
+    inferPara.push_back(NetworkDir);
+    inferPara.push_back(ModelType);
 
     emit sendToThread(capturePara, inferPara);
 
@@ -63,8 +63,8 @@ void Utility::parseJSValue(QJSValue jsValue) {
     qDebug() << "captureWidth is: " << captureWidth;
     qDebug() << "captureHeight is: " << captureHeight;
     qDebug() << "infer device is: " << inferDevice;
-    qDebug() << "yoloNetworkDir is: " << yoloNetworkDir;
-    qDebug() << "yoloModelSize is: " << yoloModelSize;
+    qDebug() << "NetworkDir is: " << NetworkDir;
+    qDebug() << "ModelType is: " << ModelType;
     qDebug() << "capturePara is: " << capturePara;
     qDebug() << "inferPara is: " << inferPara;
 // In addition, in debug mode, a debug json file is generated.
