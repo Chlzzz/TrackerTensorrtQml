@@ -3,7 +3,7 @@ import QtCharts 2.15
 import QtQuick.Controls 2.15
 
 import QtQuick.Dialogs 1.3
-import Qt.labs.platform 1.0
+import Qt.labs.platform 1.1
 
 Item {
     id: item1
@@ -18,6 +18,22 @@ Item {
         height: parent.height
         radius: 20
         color: "transparent"
+
+        property var paraList : {
+            "camera_type": "USB",
+            "cam_device": "0",
+            "infer_device": "Nvidia GPU",
+            "task_type": "Detection",
+            "network_directory": "./"
+        }
+
+        function stringifyAndSend(paraList){
+            var jsonString = JSON.stringify(paraList)
+            console.log(jsonString)
+            console.log("Send to C++")
+            // balabala send!
+            utility.parseJSValue(paraList)
+        }
 
 
         Rectangle{
@@ -58,152 +74,188 @@ Item {
             }
         }
 
-        Rectangle {
-            id: controlPanel
-            width: 271
-            height: 574
+
+         Rectangle {
+            id: controlCamPanel
+            height: 90
             color: "#ffffff"
-            anchors.verticalCenter: parent.verticalCenter
             anchors.left: canvas.right
-            anchors.leftMargin: 20
-
-            property var paraList : {
-                "camera_index": RGB,
-                "resolution": {
-                    "width": 640,
-                    "height": 480,
-                },
-                "infer_device": "Intel CPU",
-                "network_directory": "./",
-                "model_type": "nano"
-            }
-
-            function stringifyAndSend(paraList){
-                var jsonString = JSON.stringify(paraList)
-                console.log(jsonString)
-                console.log("Send to C++")
-                // balabala send!
-                utility.parseJSValue(paraList)
-            }
-
+            anchors.leftMargin: 40
+            anchors.right: parent.right
+            anchors.rightMargin: 5
+            anchors.top: canvas.top
 
             Text {
                 id: cameraText
-                text: qsTr("Camera Index")
-                anchors.left: parent.left
+                text: qsTr("Camera Type")
                 anchors.top: parent.top
-                font.pixelSize: 14
-                font.family: "Fredoka Light"
-                anchors.topMargin: 20
-                anchors.leftMargin: 10
+                anchors.topMargin: 10
+                anchors.horizontalCenter: parent.horizontalCenter
+                font.pixelSize: 15
+                font.family: "Fredoka Light"   
             }
 
-            ComboBox {
-                property string camIndex: '0'
-                id: camIndexSelect
-                width: 120
-                anchors.verticalCenter: cameraText.verticalCenter
-                anchors.left: cameraText.right
-                anchors.leftMargin: 42
-                font.pixelSize: 12
-                font.family: "Fredoka Light"
-                model: ["0", "1", "2", "3", "4", "5","rtsp"]
 
-                onDisplayTextChanged: {
-                    camIndex = cameraMap[displayText];
-//                    if (camIndex === "0") {
-//                        console.log("Default camera index is 0 !");
-//                    }
+            // 左边的 ComboBox
+            ComboBox {
+                id: camTypeBox
+                anchors.top: cameraText.bottom
+                anchors.topMargin: 10
+                anchors.left: parent.left
+                anchors.leftMargin: 15
+                width: 90
+                height: 35
+                font.pixelSize: 15
+                font.family: "Fredoka Light"
+                model: ["USB", "RTSP"]
+                currentIndex: 0
+                onCurrentIndexChanged: {
+                    // 根据选项切换 Item A 和 Item B 的可见性
+                    usbComboBox.visible = (currentIndex === 0);
+                    rtspInput.visible = (currentIndex === 1);
                 }
             }
 
-            Text {
-                id: resText
-                text: qsTr("Resolution")
-                anchors.left: parent.left
-                anchors.top: cameraText.bottom
-                font.pixelSize: 14
-                font.family: "Fredoka Light"
-                anchors.leftMargin: 10
-                anchors.topMargin: 40
-            }
+            // 右边的控件
+            Item {
+                anchors.top: camTypeBox.top
+                anchors.left: camTypeBox.right
+                anchors.leftMargin: 15
+                width:130
+                height:35
+                // USB 模式下的 ComboBox
+                ComboBox {
+                    id: usbComboBox
+                    anchors.fill: parent
+                    font.pixelSize: 15
+                    font.family: "Fredoka Light"
+                    model: [0, 1, 2, 3, 4, 5]
+                    currentIndex: 0
+                    visible: true // 默认显示
+                    onCurrentIndexChanged: {
+                        if (visible === true) {
+                            demoContent.paraList["cam_device"] = displayText
+                            demoContent.paraList["camera_type"] = camTypeBox.displayText
+                        }
+                    }
+                }
 
-            ComboBox {
-                property int m_width: 640
-                property int m_height: 480
-                id: resSelect
-                width: 120
-                anchors.verticalCenter: resText.verticalCenter
-                anchors.horizontalCenter: camIndexSelect.horizontalCenter
-                font.pixelSize: 12
-                font.family: "Fredoka Light"
-                model:["640×480", "384×288"]
-                // onDisplayTextChanged: {
-                //     switch(displayText){
-                //     case "640×480":
-                //         m_width = 640
-                //         m_height = 480
-                //         break;
-                //     case "384×288":
-                //         m_width = 384
-                //         m_height = 288
-                //         break;
-                //     }
-                //     controlPanel.paraList["resolution"]["width"] = m_width
-                //     controlPanel.paraList["resolution"]["height"] = m_height
-                // }
+                Rectangle {
+                    id: rtspInput
+                    color: "#E8E8E8"
+                    anchors.fill: parent
+                    visible: false // 默认隐藏
+                    // RTSP 模式下的 TextInput
+                    TextInput {
+                        id: rtspAddress
+                        anchors.fill: parent // 填充整个 Rectangle
+                        anchors.margins: 5 // 设置边距
+                        verticalAlignment: Text.AlignVCenter // 垂直居中
+                        font.pixelSize: 15
+                        font.family: "Fredoka Light"
+                        text: qsTr("192.168.")
+                        validator: RegExpValidator {
+                            regExp: /^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/
+                        }
+                        onTextChanged: {
+                            if (visible === true) {
+                                demoContent.paraList["cam_device"] = text
+                                demoContent.paraList["camera_type"] = camTypeBox.displayText
+                            }
+                        }
+                    }
+                }
             }
+         }
+
+         Rectangle {
+            id: controlModelPanel
+            height: 400
+            color: "#ffffff"
+            anchors.top: controlCamPanel.bottom
+            anchors.topMargin: 15
+            anchors.left: canvas.right
+            anchors.leftMargin: 40
+            anchors.right: parent.right
+            anchors.rightMargin: 5
 
             Text {
                 id: inferDeviceText
                 text: qsTr("Inference Device")
                 anchors.left: parent.left
-                anchors.top: resText.bottom
-                font.pixelSize: 14
+                anchors.top: parent.top
+                anchors.topMargin: 20
+                font.pixelSize: 15
                 font.family: "Fredoka Light"
-                anchors.leftMargin: 10
-                anchors.horizontalCenterOffset: 18
-                anchors.topMargin: 40
+                anchors.leftMargin: 15
             }
 
             ComboBox {
                 id: inferDevide
                 width: 120
+                height:35
+                anchors.left: inferDeviceText.right
+                anchors.leftMargin: 15
                 anchors.verticalCenter: inferDeviceText.verticalCenter
-                anchors.horizontalCenter: resSelect.horizontalCenter
-                font.pixelSize: 12
+                font.pixelSize: 14
                 font.family: "Fredoka Light"
-                model: ["Intel CPU", "Nvidia GPU"]
-                // onDisplayTextChanged: {
-                //     controlPanel.paraList["infer_device"] = displayText
-                // }
+                model: ["Nvidia GPU", "Intel CPU"]
+                onDisplayTextChanged: {
+                     demoContent.paraList["infer_device"] = displayText
+                }
+            }
+
+            Text {
+                id: modelTypeText
+                text: qsTr("Task Type")
+                anchors.left: parent.left
+                anchors.top: inferDeviceText.bottom
+                font.pixelSize: 15
+                font.family: "Fredoka Light"
+                anchors.leftMargin: 15
+                anchors.topMargin: 40
+            }
+
+            ComboBox {
+                id: modelTypeSelect
+                width: 120
+                height:35
+                anchors.verticalCenter: modelTypeText.verticalCenter
+                anchors.horizontalCenter: inferDevide.horizontalCenter
+                font.pixelSize: 15
+                font.family: "Fredoka Light"
+                model: ["Detection", "Tracking", "Fusion"]
+                 onDisplayTextChanged: {
+                     demoContent.paraList["task_type"] = displayText
+                 }
             }
 
             Text {
                 id: networkText
                 text: qsTr("Network file directory")
                 anchors.left: parent.left
-                anchors.top: inferDeviceText.bottom
-                font.pixelSize: 14
+                anchors.top: modelTypeText.bottom
+                font.pixelSize: 15
                 font.family: "Fredoka Light"
-                anchors.leftMargin: 10
+                anchors.leftMargin: 15
                 anchors.topMargin: 40
             }
 
             Text {
                 id: networkDir
                 width: 220
-                height: 20
+                height: 30
                 anchors.left: parent.left
                 anchors.top: networkText.bottom
                 anchors.leftMargin: 10
-                anchors.topMargin: 40
-                font.pixelSize: 12
+                anchors.topMargin: 15
+                font.pixelSize: 15
+                verticalAlignment: Text.AlignVCenter    // 文本垂直居中
+                leftPadding: 5                          // 左侧内边距，避免文本紧贴边框
+                elide: Text.ElideLeft                   // 文本过长，保留右边
                 font.family: "Fredoka Light"
                 text: qsTr("Path to a directory...")
-                elide: Text.ElideRight
-                leftPadding: 5
-                verticalAlignment: Text.AlignVCenter
+
                 Rectangle {
                     width: parent.width
                     height: parent.height
@@ -231,47 +283,24 @@ Item {
                     }
                 }
             }
-            FolderDialog {
+            FileDialog {
                 id: networkFolderDialog
                 property string url: ""
                 onAccepted: {
-                    var url = networkFolderDialog.folder
-                    networkDir.text = url.toString().slice(8)
-                    controlPanel.paraList["network_directory"] = url.toString().slice(8)
+                    var url = networkFolderDialog.file
+                    networkDir.text = url.toString().slice(7)
+                    demoContent.paraList["network_directory"] = networkDir.text
                 }
                 onRejected: {
                     networkDir.text = qsTr("Must provide a valid folder path...")
                 }
             }
 
-            Text {
-                id: modelSizeText
-                text: qsTr("Task Type")
-                anchors.left: parent.left
-                anchors.top: networkDir.bottom
-                font.pixelSize: 14
-                font.family: "Fredoka Light"
-                anchors.leftMargin: 10
-                anchors.topMargin: 50
-            }
-
-            ComboBox {
-                id: modelSizeSelect
-                width: 120
-                anchors.verticalCenter: modelSizeText.verticalCenter
-                anchors.horizontalCenter: inferDevide.horizontalCenter
-                font.pixelSize: 12
-                font.family: "Fredoka Light"
-                model: ["Detection", "Tracking", "Fusion"]
-                // onDisplayTextChanged: {
-                //     controlPanel.paraList["Task Type"] = displayText
-                // }
-            }
 
             Button {
-                id: saveParameterBtn
+                id: saveModelParaBtn
                 text: qsTr("Save and init Engine")
-                anchors.top: modelSizeText.bottom
+                anchors.top: selectFile.bottom
                 font.family: "Fredoka Light"
                 font.pixelSize: 12
                 highlighted: true
@@ -283,14 +312,14 @@ Item {
                     // This button slot function:
                     // 1. stringify js/qml object file and send to C++ backend
                     // 2. check the parameters, return status from C++
-                    controlPanel.stringifyAndSend(controlPanel.paraList)
+                    demoContent.stringifyAndSend(demoContent.paraList)
 
                     checkParameter()
                 }
                 function checkParameter(){
                     validParameter = utility.getEngineStatus()
                     if(validParameter){
-                        console.log("Successfully found the files, you may begin to detect")
+                        console.log("Successfully found the files, you may begin to infer")
                         startCaptureBtn.enabled = true
                         startNetWorkBtn.enabled = true
                     } else {
@@ -318,14 +347,16 @@ Item {
                 height: 80
                 text: qsTr("You should set the parameters here and click 'SAVE AND INIT ENGINE' button before you start running the program on the left.")
                 anchors.left: parent.left
-                anchors.top: saveParameterBtn.bottom
+                anchors.top: saveModelParaBtn.bottom
                 font.pixelSize: 12
                 font.family: "Fredoka Light"
                 anchors.leftMargin: 20
                 anchors.topMargin: 30
                 wrapMode: Text.Wrap
             }
-        }
+
+         }
+
 
         ToolBar {
             id: toolBar
@@ -422,7 +453,7 @@ Item {
         function onErrorMessageChanged() {
             messageDialog.text = utility.getErrorMessage()
             messageDialog.open()
-            saveParameterBtn.validParameter = false
+            saveModelParaBtn.validParameter = false
         }
     }
 

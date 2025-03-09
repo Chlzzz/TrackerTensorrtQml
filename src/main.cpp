@@ -1,4 +1,4 @@
-#include <QGuiApplication>
+#include <QApplication>
 #include <QQmlApplicationEngine>
 #include <QIcon>
 #include <QQmlContext>
@@ -14,19 +14,20 @@ int main(int argc, char *argv[])
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 #endif
-    QGuiApplication app(argc, argv);
+    QApplication app(argc, argv);
 
     // Initialize utility for some additional pasering, then transfet to ThreadController
     Utility *utility = new Utility();
-
+   
     // Initialize the ImageProvider, and transfer to the ThreadController
     OCVImageProvider *ocvImageProvider = new OCVImageProvider();
-
+   
     // Initialize statusMoinitor for monitoring usage of some hardwares, also pass to ThreadController
     StatusMonitor *statusMonitor = new StatusMonitor();
-
+   
     // Initialize the thread to do our work
     ThreadController *controller = new ThreadController(nullptr, ocvImageProvider, statusMonitor, utility);
+
 
     QQmlApplicationEngine engine;
     const QUrl url(QStringLiteral("qrc:/qml/main.qml"));

@@ -35,36 +35,38 @@ void Utility::receivedEngineStatusFalse(QString status) {
 #endif
 }
 
+//"camera_type": "USB",
+//"cam_device": "0",
+//"infer_device": "Nvidia GPU",
+//"task_type": "Detection",
+//"network_directory": "./"
+
 void Utility::parseJSValue(QJSValue jsValue) {
     QJsonObject jsonObject = jsValue.toVariant().toJsonObject();
-    int cameraIndex = jsonObject.value("camera_index").toInt();
-    QJsonObject resolutionObject = jsonObject.value("resolution").toObject();
-    int captureWidth = resolutionObject.value("width").toInt();
-    int captureHeight = resolutionObject.value("height").toInt();
+    QString cameraType = jsonObject.value("camera_type").toString();
+    QString cameraDevice = jsonObject.value("cam_device").toString();
     QString inferDevice = jsonObject.value("infer_device").toString();
     QString NetworkDir = jsonObject.value("network_directory").toString();
-    QString ModelType = jsonObject.value("model_type").toString();
+    QString TaskType = jsonObject.value("task_type").toString();
 
-    QVector<int> capturePara;
-    capturePara.push_back(cameraIndex);
-    capturePara.push_back(captureWidth);
-    capturePara.push_back(captureHeight);
+    QStringList capturePara;
+    capturePara.push_back(cameraType);
+    capturePara.push_back(cameraDevice);
 
     QStringList inferPara;
     inferPara.push_back(inferDevice);
     inferPara.push_back(NetworkDir);
-    inferPara.push_back(ModelType);
+    inferPara.push_back(TaskType);
 
     emit sendToThread(capturePara, inferPara);
 
 #ifdef _DEBUG
 // uncomment the following debug to match the result if something went sideway
-    qDebug() << "cameraIndex is: " << cameraIndex;
-    qDebug() << "captureWidth is: " << captureWidth;
-    qDebug() << "captureHeight is: " << captureHeight;
+    qDebug() << "cameraType is: " << cameraType;
+    qDebug() << "cameraDevice is: " << cameraDevice;
     qDebug() << "infer device is: " << inferDevice;
     qDebug() << "NetworkDir is: " << NetworkDir;
-    qDebug() << "ModelType is: " << ModelType;
+    qDebug() << "TaskType is: " << TaskType;
     qDebug() << "capturePara is: " << capturePara;
     qDebug() << "inferPara is: " << inferPara;
 // In addition, in debug mode, a debug json file is generated.

@@ -158,122 +158,18 @@ void StatusMonitor::monitorProcess() {
 // Windows 平台实现
 #elif defined(WIN32)
     #include <windows.h>
-    #include <intrin.h>
-    #include <pdh.h>
-    #include <wchar.h>
-    #pragma comment(lib, "pdh.lib")
-
+   
     // 获取内存信息
-    MemoryInfo get_memory_info() {
-        MEMORYSTATUSEX memory_status;
-        memory_status.dwLength = sizeof(memory_status);
-
-        if (GlobalMemoryStatusEx(&memory_status)) {
-            return {
-                static_cast<unsigned long>(memory_status.ullTotalPhys / (1024 * 1024)), // 总内存（MB）
-                static_cast<unsigned long>(memory_status.ullAvailPhys / (1024 * 1024))  // 空闲内存（MB）
-            };
-        } else {
-            std::cerr << "Failed to retrieve memory information." << std::endl;
-            return {0, 0};
-        }
-    }
+    
 
     // 获取 CPU 信息
-    CPUInfo get_cpu_info() {
-        CPUInfo info;
-
-        // 获取 CPU 名称
-        char cpu_name[0x40];
-        int cpu_info[4] = { -1 };
-        __cpuid(cpu_info, 0x80000002);
-        memcpy(cpu_name, cpu_info, sizeof(cpu_info));
-        __cpuid(cpu_info, 0x80000003);
-        memcpy(cpu_name + 16, cpu_info, sizeof(cpu_info));
-        __cpuid(cpu_info, 0x80000004);
-        memcpy(cpu_name + 32, cpu_info, sizeof(cpu_info));
-        cpu_name[48] = '\0';
-        info.name = cpu_name;
-
-        // 获取 CPU 核心数和线程数
-        SYSTEM_INFO sys_info;
-        GetSystemInfo(&sys_info);
-        info.cores = sys_info.dwNumberOfProcessors;
-        info.threads = info.cores;
-
-        // 获取 CPU 使用率
-        PDH_HQUERY query;
-        PDH_HCOUNTER counter;
-        PdhOpenQuery(nullptr, 0, &query);
-        PdhAddCounter(query, "\\Processor(_Total)\\% Processor Time", 0, &counter);
-        PdhCollectQueryData(query);
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-        PdhCollectQueryData(query);
-        PDH_FMT_COUNTERVALUE value;
-        PdhGetFormattedCounterValue(counter, PDH_FMT_DOUBLE, nullptr, &value);
-        PdhCloseQuery(query);
-        info.usage = value.doubleValue;
-
-        return info;
-    }
+   
 
     // 获取 GPU 信息（需要安装 NVIDIA 驱动和 nvidia-smi）
-    GPUInfo get_gpu_info() {
-        GPUInfo info;
-        std::string command = "nvidia-smi --query-gpu=name,memory.total,memory.free --format=csv,noheader,nounits";
-        std::string result;
-
-        FILE* pipe = _popen(command.c_str(), "r");
-        if (pipe) {
-            char buffer[128];
-            while (fgets(buffer, sizeof(buffer), pipe) != nullptr) {
-                result += buffer;
-            }
-            _pclose(pipe);
-        }
-
-        if (!result.empty()) {
-            int locs =  0;
-            int loce = 0;
-            locs = result.find(',', 0);
-            info.name = result.substr(0, locs);
-            loce = result.find(',', locs + 1);
-            info.total_memory = std::stol(result.substr(locs + 1, loce));
-            info.free_memory = std::stol(result.substr(loce + 1, sizeof(result)));
-            unsigned long sub = info.total_memory - info.free_memory;
-            info.usage =  sub * 100 / info.total_memory;
-        }
-        MemoryInfo mem_m;
-        CPUInfo cpu_m;
-        GPUInfo gpu_m;
-        return info;
-    }
+   
 
     // Windows 获取操作系统名称
-    const QString StatusMonitor::osVersion() {
-        std::string osName;
-        OSVERSIONINFOEX osInfo;
-        ZeroMemory(&osInfo, sizeof(OSVERSIONINFOEX));
-        osInfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
-
-        if (GetVersionEx((OSVERSIONINFO*)&osInfo)) {
-            if (osInfo.dwMajorVersion == 10 && osInfo.dwMinorVersion == 0) {
-                osName = "Windows 10/11";
-            } else if (osInfo.dwMajorVersion == 6 && osInfo.dwMinorVersion == 3) {
-                osName = "Windows 8.1";
-            } else if (osInfo.dwMajorVersion == 6 && osInfo.dwMinorVersion == 2) {
-                osName = "Windows 8";
-            } else if (osInfo.dwMajorVersion == 6 && osInfo.dwMinorVersion == 1) {
-                osName = "Windows 7";
-            } else {
-                osName = "Unknown Windows Version";
-            }
-        } else {
-            osName = "Failed to get Windows version";
-        }
-        m_osDescribe = QString::fromStdString(osName);
-        return m_osDescribe;
-    }
+    
 #endif
 
 void StatusMonitor::endMonitorProcess(){

@@ -44,9 +44,9 @@ public slots:
     void readFrame();
     void endCapture();
 
-    void initengine();
+    void initengine(QStringList capturePara, QStringList inferPara);
 
-    void checkInferParameter(QVecInt capturePara, QStringList inferPara);
+//    void checkInferParameter(QStringList capturePara, QStringList inferPara);
     void changeNNStatus();
 
 private:
@@ -61,10 +61,11 @@ private:
     bool m_nn_running;
     bool m_full_demo_running;
 
-    std::string m_camera_index;
-    int m_capture_width;
-    int m_capture_height;
-
+    QString m_camera_type;
+    QString m_camera_index;
+//    int m_capture_width;
+//    int m_capture_height;
+    QString m_task_type;
     QString m_full_network_path;
     QString runtime_error;
 

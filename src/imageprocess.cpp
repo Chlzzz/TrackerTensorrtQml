@@ -57,8 +57,7 @@ void ImageProcess::initCapture(const std::string cameraIndex = "0", const double
 #ifdef USE_VIDEO
     cap.open("./video/output.avi");
 #else
-    cap.open(0, cv::CAP_V4L2);
-    //cap = cv::VideoCapture(0);
+    cap.open(std::stoi(cameraIndex), cv::CAP_V4L2);
     cap.set(cv::CAP_PROP_FRAME_WIDTH, capWidth);
     cap.set(cv::CAP_PROP_FRAME_HEIGHT, capHeight);
 #endif
@@ -79,7 +78,15 @@ void ImageProcess::initCapture(const std::string cameraIndex = "0", const double
 
 
 void ImageProcess::readFrame() {
-    initCapture();
+
+    initCapture(m_camera_index.toStdString());
+    
+    std::string task_type = m_task_type.toStdString();
+    if(task_type == "Tracking") {
+        int fps = cap.get(CAP_PROP_FPS);
+        m_infer -> tracker_init(fps, 30);
+    }
+        
     while(m_image_process_running) {
         cap.read(m_frame);
 #ifdef USE_VIDEO
@@ -89,13 +96,21 @@ void ImageProcess::readFrame() {
 #ifdef USB_VIDEO
             qDebug() << "Frame is empty, will break now";
 #endif      
+            cap.release();
             break;
         } 
         else {
+            // 模型推理部分
             if(m_nn_running) {
-                 cv::Mat infer_frame = m_infer->process_signle_image(m_frame);
-                 m_q_frame = MatImageToQImage(infer_frame);
-                 emit sendImage(m_q_frame);
+                cv::Mat infer_frame;
+                if(task_type == "Tracking" ) {
+                    infer_frame = m_infer->process_image_and_track(m_frame);
+                }
+                else {
+                    infer_frame = m_infer->process_signle_image(m_frame);
+                }
+                m_q_frame = MatImageToQImage(infer_frame);
+                emit sendImage(m_q_frame);
             } else {
                  m_q_frame = MatImageToQImage(m_frame);
                  emit sendImage(m_q_frame);
@@ -115,77 +130,26 @@ void ImageProcess::endCapture() {
     m_image_process_running = false;
 }
 
- void ImageProcess::checkInferParameter(QVector<int> capturePara, QStringList inferPara) {
- #ifdef _DEBUG
-     qDebug() << "Received signal sendToThread, checking parameters now, in function " << __FUNCTION__;
- #endif
-     m_camera_index = capturePara[0];
-     m_capture_width =capturePara[1];
-     m_capture_height = capturePara[2];
-    
-     QString m_infer_device = inferPara[0];
-     QString m_network_dir = inferPara[1];
-     QString m_model_type = inferPara[2];
-   
-     QStringList switchList;
-     switchList << "fusion" << "detection" << "tracking";
-     // got to check the file
-     // I hate if... so switch case is used.
-     if(m_infer_device == "Intel CPU"){
-         switch(switchList.indexOf(m_model_type)){
-             case 1:
-                 m_full_network_path = m_network_dir + "/" + "yolox_tiny.xml";
- #ifdef _DEBUG
-                 qDebug() << "fusion, file path: " << m_full_network_path;
- #endif
-                 break;
-             case 2:
-                 m_full_network_path = m_network_dir + "/" + "yolox_s.xml";
- #ifdef _DEBUG
-                 qDebug() << "detection, file path: " << m_full_network_path;
- #endif
-                 break;
-             case 3:
-                 m_full_network_path = m_network_dir + "/" + "yolox_m.xml";
- #ifdef _DEBUG
-                 qDebug() << "tracking, file path: " << m_full_network_path;
- #endif
-                 break;
-             default:
-                 m_full_network_path = m_network_dir + "/" + "yolox_nano.xml";
- #ifdef _DEBUG
-                 qDebug() << "default method is fusion,  file path: " << m_full_network_path;
- #endif
-                 break;
 
-              // check if the file exsits...
-         }
-         QFileInfo fileInfo(m_full_network_path);
-         if(!fileInfo.exists()) {
-             m_nn_running = false;
- #ifdef _DEBUG
-             QString m_error_infer_device = "Error, unable to locate network file.\n";
-             qDebug() << m_error_infer_device;
- #endif
-             runtime_error = "Error, unable to locate yolo network file.";
-             emit sendInferDeviceError(runtime_error);
-             return ;
-         }
-         else {
-             // If nothing happened, our camera and engine will init here...
-             //infer->initEngine(m_full_network_path.toStdString(), "CPU");
-             emit sendInferDeviceSuccess();
-         }
-         // else {
+ void ImageProcess::initengine(QStringList capturePara, QStringList inferPara) {
+    m_camera_index = capturePara[1];
+    m_full_network_path = inferPara[1];
+    m_task_type = inferPara[2];
 
-         //     // do something
-         // }
-     }
- }
+    QFileInfo fileInfo(m_full_network_path);
+    if(!fileInfo.exists()) {
+        m_nn_running = false;
+#ifdef _DEBUG
+        QString m_error_infer_device = "Error, unable to locate network file.\n";
+        qDebug() << m_error_infer_device;
+#endif
+        runtime_error = "Error, unable to locate  network file.";
+        emit sendInferDeviceError(runtime_error);
+        return ;
+    }
 
+    m_infer -> call_create_infer(m_full_network_path.toStdString());
 
- void ImageProcess::initengine() {
-    m_infer -> call_create_infer();
     emit sendInferDeviceSuccess();
  }
 

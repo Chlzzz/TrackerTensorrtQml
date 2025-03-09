@@ -1,12 +1,9 @@
 cmake_minimum_required(VERSION 3.14)
 
-project(FusionNetShow VERSION 0.1 LANGUAGES CXX)
+project(NetWorkShow VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tensorRT_Pro_Model)
 
 set(CUDA_TOOLKIT_ROOT_DIR     "/usr/local/cuda")
 set(CUDNN_DIR    "/home/nh/Packages/cudnn-8.8.1.3")
@@ -15,17 +12,21 @@ set(TENSORRT_DIR "/home/nh/Packages/TensorRT-8.6.1.6")
 # 因为protobuf，需要用特定版本，所以这里指定路径
 set(PROTOBUF_DIR "/usr/local/protobuf")
 
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/bytetrack)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tensorRT_Pro_Model)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 #set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
+set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin)
+set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_CURRENT_SOURCE_DIR}/iconwin/app.rc")
 
+# ===== 宏定义
 set(CMAKE_BUILD_TYPE DEBUG)
 if (CMAKE_BUILD_TYPE STREQUAL "DEBUG")
     add_definitions(-D_DEBUG)
 endif()
-
 # 检测操作系统并定义宏
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     add_definitions(-DUNIX)  # 定义 LINUX 宏
@@ -33,9 +34,6 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     add_definitions(-DWIN32)  # 定义 WINDOWS 宏
 endif()
 #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_VIDEO")
-
-set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/bin)
-set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_CURRENT_SOURCE_DIR}/iconwin/app.rc")
 
 
 find_package(CUDA REQUIRED)
@@ -52,7 +50,8 @@ include_directories(
     ${PROTOBUF_DIR}/include
     ${TENSORRT_DIR}/include
     ${CUDNN_DIR}/include
-    ${OpenCV_DIR}/include/opencv4
+
+    # ${OpenCV_DIR}/include/opencv4
 )
 
 link_directories(
@@ -60,7 +59,8 @@ link_directories(
     ${TENSORRT_DIR}/lib
     ${CUDA_TOOLKIT_ROOT_DIR}/lib64
     ${CUDNN_DIR}/lib
-    ${OpenCV_DIR}/lib
+    ${OpenCV_LIBS}
+    # ${OpenCV_DIR}/lib
 )
 
 
@@ -118,6 +118,7 @@ target_include_directories(${PROJECT_NAME}
       ${CMAKE_CURRENT_SOURCE_DIR}/tensorRT_Pro_Model/src/application
       ${CMAKE_CURRENT_SOURCE_DIR}/tensorRT_Pro_Model/src/tensorRT
       ${CMAKE_CURRENT_SOURCE_DIR}/tensorRT_Pro_Model/src/tensorRT/common
+      ${CMAKE_CURRENT_SOURCE_DIR}/bytetrack/include
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -127,8 +128,8 @@ target_link_libraries(${PROJECT_NAME}
       Qt${QT_VERSION_MAJOR}::Widgets
       ${OpenCV_LIBS}
       rtdetr_pro
-      plugin_list
-      
+      plugin_list 
+      bytetrack 
 )
 
 

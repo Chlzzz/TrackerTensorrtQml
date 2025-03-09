@@ -6,3 +6,4 @@ workerspace
 lib
 rtdetr-l.FP32.trtmodel
 qml_rc.py
+CMakeLists.txt.user

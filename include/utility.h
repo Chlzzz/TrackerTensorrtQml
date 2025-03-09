@@ -31,7 +31,7 @@ public:
 signals:
     void engineStatusChanged(const bool engineStatus);
     void errorMessageChanged(const QString errorMessage);
-    void sendToThread(QVecInt capturePara, QStringList inferPara);
+    void sendToThread( QStringList capturePara,  QStringList inferPara);
 
 public slots:
     void setEngineStatus(const bool engineStatus);
