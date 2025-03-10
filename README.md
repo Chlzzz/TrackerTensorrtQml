@@ -78,6 +78,7 @@ include/src
 
 
 ## 参考资源
++ [YoloV5RGBD](https://github.com/parker-int64/yolov5-RGBD)
 + [tensorRT_Pro](https://github.com/shouxieai/tensorRT_Pro)
 + [tensorRT_Pro_YOLOV8](https://github.com/Melody-Zhou/tensorRT_Pro-YOLOv8)
 + [ByteTrack](https://github.com/ifzhang/ByteTrack)
