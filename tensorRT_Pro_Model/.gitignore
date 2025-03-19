@@ -41,6 +41,7 @@
 
 /build
 
+
 /.vs
 *.pyd
 *.zip
@@ -50,12 +51,14 @@
 *.exp
 
 /workspace/exp
+/workspace/pro
 /workspace/inf*
 /workspace/ppocr
 /workspace/dep*
 /workspace/lan*
 /workspace/ocr*
 /workspace/*.txt
+/workspace/*.trt
 /workspace/*.mp4
 /workspace/single_inference
 /workspace/perf.result.log

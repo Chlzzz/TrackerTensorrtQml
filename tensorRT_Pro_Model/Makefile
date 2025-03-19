@@ -127,6 +127,9 @@ bytetrack : workspace/pro
 
 rtdetr : workspace/pro
 	@cd workspace && ./pro rtdetr
+	
+ostrack : workspace/pro
+	@cd workspace && ./pro ostrack 0 "exp/bag.avi"
 
 rtmo : workspace/pro
 	@cd workspace && ./pro rtmo

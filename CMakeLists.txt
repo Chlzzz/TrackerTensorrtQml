@@ -12,7 +12,7 @@ set(TENSORRT_DIR "/home/nh/Packages/TensorRT-8.6.1.6")
 # 因为protobuf，需要用特定版本，所以这里指定路径
 set(PROTOBUF_DIR "/usr/local/protobuf")
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/bytetrack)
+
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tensorRT_Pro_Model)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -51,7 +51,6 @@ include_directories(
     ${TENSORRT_DIR}/include
     ${CUDNN_DIR}/include
 
-    # ${OpenCV_DIR}/include/opencv4
 )
 
 link_directories(
@@ -60,7 +59,6 @@ link_directories(
     ${CUDA_TOOLKIT_ROOT_DIR}/lib64
     ${CUDNN_DIR}/lib
     ${OpenCV_LIBS}
-    # ${OpenCV_DIR}/lib
 )
 
 
@@ -127,9 +125,9 @@ target_link_libraries(${PROJECT_NAME}
       Qt${QT_VERSION_MAJOR}::Quick
       Qt${QT_VERSION_MAJOR}::Widgets
       ${OpenCV_LIBS}
-      rtdetr_pro
-      plugin_list 
-      bytetrack 
+
+     trt_pro
+     plugin_list
 )
 
 

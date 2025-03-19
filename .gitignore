@@ -4,6 +4,8 @@ bin
 video
 workerspace
 lib
-rtdetr-l.FP32.trtmodel
+*.trt
+*.trtmodel
+
 qml_rc.py
 CMakeLists.txt.user
