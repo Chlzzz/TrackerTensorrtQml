@@ -1,4 +1,4 @@
-#include "app_rtdetr.h"
+#include "node_rtdetr.h"
 
 using namespace std;
 
@@ -60,7 +60,7 @@ void AppRTdetr::call_create_infer(const std::string model_addr) {
 }
 
 void AppRTdetr::tracker_init(int frame_rate, int tracker_buffer) {
-    m_tracker = std::make_shared<BYTETracker>(frame_rate, tracker_buffer);
+    m_byte_tracker = std::make_shared<BYTETracker>(frame_rate, tracker_buffer);
 }
 
 
@@ -112,13 +112,13 @@ cv::Mat AppRTdetr::process_image_and_track(cv::Mat& image) {
     }
 
      // process bytetrack
-     std::vector<STrack> output_stracks = m_tracker -> update(objects);
+     std::vector<STrack> output_stracks = m_byte_tracker -> update(objects);
 
      // draw rects
      for (int i = 0; i < output_stracks.size(); ++i) {
         std::vector<float> tlwh = output_stracks[i].tlwh;
         if (tlwh[2] * tlwh[3] > 20) {
-            cv::Scalar s = m_tracker -> get_color(output_stracks[i].track_id);
+            cv::Scalar s = m_byte_tracker -> get_color(output_stracks[i].track_id);
             cv::putText(image, cv::format("%d", output_stracks[i].track_id), cv::Point(tlwh[0], tlwh[1] - 5), 
                     0, 0.6, cv::Scalar(0, 0, 255), 2, cv::LINE_AA);
             cv::rectangle(image, cv::Rect(tlwh[0], tlwh[1], tlwh[2], tlwh[3]), s, 2);

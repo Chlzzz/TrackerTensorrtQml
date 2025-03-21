@@ -224,7 +224,7 @@ Item {
                 anchors.horizontalCenter: inferDevide.horizontalCenter
                 font.pixelSize: 15
                 font.family: "Fredoka Light"
-                model: ["Detection", "Tracking", "Fusion"]
+                model: ["MOT", "VOT"]
                  onDisplayTextChanged: {
                      demoContent.paraList["task_type"] = displayText
                  }

@@ -40,7 +40,7 @@ void StatusMonitor::monitorProcess() {
     uint8_t StatusMonitor::get_memory_usage() {
         QProcess process;
         QStringList arguments;
-        arguments << "-m";
+        arguments << "-g";
         process.start("free", arguments); //使用free完成获取
         process.waitForFinished();
         process.readLine();
@@ -48,16 +48,10 @@ void StatusMonitor::monitorProcess() {
         str.replace("\n","");
         str.replace(QRegExp("( ){1,}")," ");//将连续空格替换为单个空格 用于分割
         auto lst = str.split(" ");
-        if(lst.size() > 6) {
-            //qDebug("mem total:%.0lfMB free:%.0lfMB",lst[1].toDouble(),lst[6].toDouble());
-            uint16_t nMemTotal = lst[1].toUShort() >> 10;
-            uint16_t sub_nMemFree = nMemTotal - (lst[6].toUShort() >> 10);
-            m_mem_usage_thread = sub_nMemFree * 100/ nMemTotal;
-            return m_mem_usage_thread ;
-        }
-        else {
-            return false;
-        }
+        uint8_t nMemTotal = lst[1].toUShort();
+        uint8_t sub_nMemFree = nMemTotal - lst[6].toUShort();
+        m_mem_usage_thread = sub_nMemFree * 100/ nMemTotal;
+        return m_mem_usage_thread ;
     }
 
     // 获取 CPU 信息
@@ -100,7 +94,7 @@ void StatusMonitor::monitorProcess() {
     // 获取 GPU 信息（需要安装 NVIDIA 驱动和 nvidia-smi）
     uint8_t StatusMonitor::get_gpu_usage() {
 
-        std::string command = "nvidia-smi --query-gpu=name,memory.total,memory.free --format=csv,noheader,nounits";
+        std::string command = "nvidia-smi --query-gpu=memory.total,memory.free --format=csv,noheader,nounits";
         std::string result;
 
         FILE* pipe = popen(command.c_str(), "r");
@@ -115,14 +109,12 @@ void StatusMonitor::monitorProcess() {
         if (result.empty()) {
            return 0;
         }
-        int locs =  0;
-            int loce = 0;
-            locs = result.find(',', 0);
-            loce = result.find(',', locs + 1);
-            long total_memory = std::stol(result.substr(locs + 1, loce - locs - 1)) >> 10;
-            long free_memory = std::stol(result.substr(loce + 1)) >> 10;
-            int sub = total_memory - free_memory;
-            return sub * 100 / total_memory;
+
+        int loce = result.find(',');
+        long total_memory = std::stol(result.substr(0, loce)) >> 10;
+        long free_memory = std::stol(result.substr(loce + 1)) >> 10;
+        int sub = total_memory - free_memory;
+        return sub * 100 / total_memory;
     }
 
     // 获取 OS 信息
@@ -202,7 +194,7 @@ const QString StatusMonitor::cpuType() {
 
 
 const QString StatusMonitor::nvidiaGPU() {
-    std::string command = "nvidia-smi --query-gpu=name,memory.total,memory.free --format=csv,noheader,nounits";
+    std::string command = "nvidia-smi --query-gpu=name --format=csv,noheader,nounits";
     std::string result;
 
     FILE* pipe = popen(command.c_str(), "r");
@@ -213,21 +205,15 @@ const QString StatusMonitor::nvidiaGPU() {
         }
         pclose(pipe);
     }
-
-    //if (!result.empty()) {
-        int locs =  0;
-        int loce = 0;
-        locs = result.find(',', 0);
-        m_gpuDescribe = QString::fromStdString(result.substr(0, locs));
-        return m_gpuDescribe;
-    //}
+    m_gpuDescribe = QString::fromStdString(result);
+    return m_gpuDescribe;
 
 }
 
 const QString StatusMonitor::memory() {
     QProcess process;
     QStringList arguments;
-    arguments << "-m";
+    arguments << "-g";
     process.start("free", arguments); //使用free完成获取
     process.waitForFinished();
     process.readLine();
@@ -235,10 +221,7 @@ const QString StatusMonitor::memory() {
     str.replace("\n","");
     str.replace(QRegExp("( ){1,}")," ");//将连续空格替换为单个空格 用于分割
     auto lst = str.split(" ");
-    //if(lst.size() > 6) {
-        //qDebug("mem total:%.0lfMB free:%.0lfMB",lst[1].toDouble(),lst[6].toDouble());
-        int med = lst[1].toUShort() >> 10;
-        m_memDescribe = QString::number(med);
-        return m_memDescribe;
-    //}
+    int med = lst[1].toUShort();
+    m_memDescribe = QString::number(med);
+    return m_memDescribe;
 }

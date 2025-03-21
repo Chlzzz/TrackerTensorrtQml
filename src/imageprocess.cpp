@@ -5,6 +5,7 @@ ImageProcess::ImageProcess(QObject* parent) : QObject(parent) {
     m_nn_running = false;
     m_full_demo_running = false;
     m_infer = std::make_shared<AppRTdetr>();
+    m_tracker = std::make_shared<AppOStrack>();
 }
 
 ImageProcess::~ImageProcess(){
@@ -70,7 +71,7 @@ void ImageProcess::initCapture(const std::string cameraIndex = "0", const double
         runtime_error = "Error, unable to open the camera";
         cap.release();
         emit sendCameraError(runtime_error);
-        return;
+        return; 
     } else {
         m_image_process_running = true;
     }
@@ -82,11 +83,9 @@ void ImageProcess::readFrame() {
     initCapture(m_camera_index.toStdString());
     
     std::string task_type = m_task_type.toStdString();
-    if(task_type == "Tracking") {
-        int fps = cap.get(CAP_PROP_FPS);
-        m_infer -> tracker_init(fps, 30);
-    }
-        
+
+    bool is_init = false;
+
     while(m_image_process_running) {
         cap.read(m_frame);
 #ifdef USE_VIDEO
@@ -95,30 +94,49 @@ void ImageProcess::readFrame() {
         if(m_frame.empty()) {
 #ifdef USB_VIDEO
             qDebug() << "Frame is empty, will break now";
-#endif      
+#endif
             cap.release();
             break;
-        } 
+        }
         else {
             // 模型推理部分
             if(m_nn_running) {
-                cv::Mat infer_frame;
-                if(task_type == "Tracking" ) {
+                if(task_type == "MOT") {
+                    if(!is_init) {
+                        is_init = true;
+                        int fps = cap.get(CAP_PROP_FPS);
+                        m_infer -> tracker_init(fps, 30);
+                    }
+                    cv::Mat infer_frame;
                     infer_frame = m_infer->process_image_and_track(m_frame);
+                    m_q_frame = MatImageToQImage(infer_frame);
+                    emit sendImage(m_q_frame);
                 }
-                else {
-                    infer_frame = m_infer->process_signle_image(m_frame);
-                }
-                m_q_frame = MatImageToQImage(infer_frame);
-                emit sendImage(m_q_frame);
-            } else {
-                 m_q_frame = MatImageToQImage(m_frame);
-                 emit sendImage(m_q_frame);
+                else if(task_type == "VOT") {
+                    if(!is_init) {
+                        cap.read(m_frame);
+                        cv::imshow("Tracker", m_frame);
+                        cv::putText(m_frame, "Select target ROI and press ENTER", cv::Point2i(20, 30),
+                        cv::FONT_HERSHEY_COMPLEX_SMALL, 1, cv::Scalar(255,0,0), 1);
+                        cv::waitKey(1);
+                        cv::Rect init_bbox = cv::selectROI("Tracker", m_frame); 
+                        m_tracker->init_tracker(m_frame, init_bbox);
+                    }
+                    cv::Mat infer_frame;
+                    infer_frame = m_tracker->process_image_and_track(m_frame);
+                    m_q_frame = MatImageToQImage(infer_frame);
+                    emit sendImage(m_q_frame);
+                }    
             }
+            else {
+                    m_q_frame = MatImageToQImage(m_frame);
+                    emit sendImage(m_q_frame);
+                }
         }
     }
-    cap.release();
+    cap.release();   
 }
+
 
 
 void ImageProcess::startCapture() {
@@ -148,8 +166,13 @@ void ImageProcess::endCapture() {
         return ;
     }
 
-    m_infer -> call_create_infer(m_full_network_path.toStdString());
-
+    if(m_task_type == "MOT") {
+        m_infer->call_create_infer(m_full_network_path.toStdString());
+    }
+    else if(m_task_type == "VOT") {
+        m_tracker->call_create_tracker(m_full_network_path.toStdString());
+    }
+    
     emit sendInferDeviceSuccess();
  }
 

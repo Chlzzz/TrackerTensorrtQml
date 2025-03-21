@@ -26,7 +26,7 @@ public:
     
 private:
     std::shared_ptr<RTDETR::Infer> m_infer_engine;
-    std::shared_ptr<BYTETracker> m_tracker;
+    std::shared_ptr<BYTETracker> m_byte_tracker;
 };
 
 

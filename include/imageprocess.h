@@ -1,8 +1,6 @@
 #ifndef IMAGEPROCESS_H_
 #define IMAGEPROCESS_H_
 
-
-
 #include <QImage>
 #include <QObject>
 #include <QMutex>
@@ -13,10 +11,12 @@
 
 #include <iostream>
 #include <cstring>
+#include <thread>
 #include <opencv2/highgui.hpp>
 
 #include "utility.h"
-#include "app_rtdetr.h"
+#include "node_rtdetr.h"
+#include "node_ostrack.h"
 
 #ifdef _DEBUG
     #include <QDebug>
@@ -71,6 +71,7 @@ private:
 
     // CPUInfer *infer;
     std::shared_ptr<AppRTdetr> m_infer;
+    std::shared_ptr<AppOStrack>  m_tracker;
     
 };
 

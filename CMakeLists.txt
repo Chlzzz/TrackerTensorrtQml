@@ -68,7 +68,8 @@ set(PROJECT_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/include/threadcontroller.h
         ${CMAKE_CURRENT_SOURCE_DIR}/include/imageprocess.h
         ${CMAKE_CURRENT_SOURCE_DIR}/include/ocvimageprovider.h
-        ${CMAKE_CURRENT_SOURCE_DIR}/include/app_rtdetr.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/node_rtdetr.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/node_ostrack.h
         
         ${CMAKE_CURRENT_SOURCE_DIR}/src/utility.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/statusmonitor.cpp
@@ -76,7 +77,8 @@ set(PROJECT_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/src/threadcontroller.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/imageprocess.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/ocvimageprovider.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/app_rtdetr.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/node_rtdetr.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/node_ostrack.cpp
         
         qml.qrc
 )
@@ -116,7 +118,7 @@ target_include_directories(${PROJECT_NAME}
       ${CMAKE_CURRENT_SOURCE_DIR}/tensorRT_Pro_Model/src/application
       ${CMAKE_CURRENT_SOURCE_DIR}/tensorRT_Pro_Model/src/tensorRT
       ${CMAKE_CURRENT_SOURCE_DIR}/tensorRT_Pro_Model/src/tensorRT/common
-      ${CMAKE_CURRENT_SOURCE_DIR}/bytetrack/include
+      ${CMAKE_CURRENT_SOURCE_DIR}/tensorRT_Pro_Model/src/application/app_bytetrack/include
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -126,8 +128,9 @@ target_link_libraries(${PROJECT_NAME}
       Qt${QT_VERSION_MAJOR}::Widgets
       ${OpenCV_LIBS}
 
-     trt_pro
-     plugin_list
+       trt_pro
+       bytetrack
+       plugin_list
 )
 
 
