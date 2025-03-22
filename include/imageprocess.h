@@ -32,6 +32,7 @@ public:
 
     QImage MatImageToQImage(const cv::Mat& src);
     void initCapture(const std::string cameraIndex, const double capWidth, const double capHeight);
+    void ostrack_init(const QRect &roi);
 
 signals:
     void sendImage(const QImage&);
@@ -55,6 +56,7 @@ private:
 
     cv::VideoCapture cap;
     cv::Mat m_frame;
+    cv::Rect init_bbox;
     QImage m_q_frame;
 
     bool m_image_process_running;
@@ -68,6 +70,8 @@ private:
     QString m_task_type;
     QString m_full_network_path;
     QString runtime_error;
+
+    bool is_init;
 
     // CPUInfer *infer;
     std::shared_ptr<AppRTdetr> m_infer;

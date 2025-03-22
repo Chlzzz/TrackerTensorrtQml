@@ -71,6 +71,58 @@ Item {
                 function setDefault(){
                     source = "qrc:/assets/videocam.png"
                 }
+
+                property point startPoint: Qt.point(0, 0)
+                property point endPoint: Qt.point(0, 0)
+                property bool selecting: false
+
+                Rectangle {
+                    id: roiRect
+                    color: "transparent"
+                    border.color: "red"
+                    border.width: 2
+                    visible: false
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    onPressed: {
+                        imageRGB.startPoint = Qt.point(mouse.x, mouse.y)
+                        imageRGB.selecting = true
+                        roiRect.visible = true
+                    }
+                    onPositionChanged: {
+                        if (imageRGB.selecting) {
+                            imageRGB.endPoint = Qt.point(mouse.x, mouse.y)
+                            imageRGB.updateROIRect()
+                        }
+                    }
+                    onReleased: {
+                        imageRGB.endPoint = Qt.point(mouse.x, mouse.y)
+                        imageRGB.selecting = false
+                        roiRect.visible = false
+                        var roi = imageRGB.getROI()
+                        console.log("Selected ROI:", roi)
+                        controller.setROI(roi)
+                    }
+                }
+
+                function updateROIRect() {
+                    roiRect.x = Math.min(imageRGB.startPoint.x, imageRGB.endPoint.x)
+                    roiRect.y = Math.min(imageRGB.startPoint.y, imageRGB.endPoint.y)
+                    roiRect.width = Math.abs(imageRGB.endPoint.x - imageRGB.startPoint.x)
+                    roiRect.height = Math.abs(imageRGB.endPoint.y - imageRGB.startPoint.y)
+                }
+
+                function getROI() {
+                    return Qt.rect(
+                        Math.min(imageRGB.startPoint.x, imageRGB.endPoint.x),
+                        Math.min(imageRGB.startPoint.y, imageRGB.endPoint.y),
+                        Math.abs(imageRGB.endPoint.x - imageRGB.startPoint.x),
+                        Math.abs(imageRGB.endPoint.y - imageRGB.startPoint.y)
+                    )
+                }
+
             }
         }
 
@@ -319,13 +371,13 @@ Item {
                 function checkParameter(){
                     validParameter = utility.getEngineStatus()
                     if(validParameter){
-                        console.log("Successfully found the files, you may begin to infer")
+                        console.log("Successfully found the files, you may begin to capture")
                         startCaptureBtn.enabled = true
-                        startNetWorkBtn.enabled = true
+                        //startNetWorkBtn.enabled = true
                     } else {
                         console.log("Error: Requested files cannot be found.")
                         startNetWorkBtn.enabled = false
-                        startCaptureBtn.enabled = false
+                        //startCaptureBtn.enabled = false
                     }
                 }
             }
@@ -386,11 +438,13 @@ Item {
                     if(start_capture){
                         console.log("Start Capture...")
                         text = qsTr("END CAPTURE")
+                        startNetWorkBtn.enabled = true
                         controller.imageThreadStart()
                     } else {
                         console.log("End Capture...")
                         text = qsTr("START CAPTURE")
                         controller.imageThreadFinished()
+                        startNetWorkBtn.enabled = false
                         delayTimer.start() // set to default img
                     }
                 }

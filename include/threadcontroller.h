@@ -47,6 +47,8 @@ public slots:
     void setMemUsage(const int memUsage);
     void setNvidiaGpuUsage(const int nvidiaGpuUsage);
 
+    void setROI(const QRect &roi);
+
     void startModelDetect();
 
 private:

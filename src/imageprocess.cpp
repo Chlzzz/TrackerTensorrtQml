@@ -4,6 +4,7 @@ ImageProcess::ImageProcess(QObject* parent) : QObject(parent) {
     m_image_process_running = false;
     m_nn_running = false;
     m_full_demo_running = false;
+    is_init = false;
     m_infer = std::make_shared<AppRTdetr>();
     m_tracker = std::make_shared<AppOStrack>();
 }
@@ -83,9 +84,7 @@ void ImageProcess::readFrame() {
     initCapture(m_camera_index.toStdString());
     
     std::string task_type = m_task_type.toStdString();
-
-    bool is_init = false;
-
+ 
     while(m_image_process_running) {
         cap.read(m_frame);
 #ifdef USE_VIDEO
@@ -100,28 +99,14 @@ void ImageProcess::readFrame() {
         }
         else {
             // 模型推理部分
-            if(m_nn_running) {
+            if(m_nn_running && is_init) {
                 if(task_type == "MOT") {
-                    if(!is_init) {
-                        is_init = true;
-                        int fps = cap.get(CAP_PROP_FPS);
-                        m_infer -> tracker_init(fps, 30);
-                    }
                     cv::Mat infer_frame;
                     infer_frame = m_infer->process_image_and_track(m_frame);
                     m_q_frame = MatImageToQImage(infer_frame);
                     emit sendImage(m_q_frame);
                 }
                 else if(task_type == "VOT") {
-                    if(!is_init) {
-                        cap.read(m_frame);
-                        cv::imshow("Tracker", m_frame);
-                        cv::putText(m_frame, "Select target ROI and press ENTER", cv::Point2i(20, 30),
-                        cv::FONT_HERSHEY_COMPLEX_SMALL, 1, cv::Scalar(255,0,0), 1);
-                        cv::waitKey(1);
-                        cv::Rect init_bbox = cv::selectROI("Tracker", m_frame); 
-                        m_tracker->init_tracker(m_frame, init_bbox);
-                    }
                     cv::Mat infer_frame;
                     infer_frame = m_tracker->process_image_and_track(m_frame);
                     m_q_frame = MatImageToQImage(infer_frame);
@@ -137,6 +122,16 @@ void ImageProcess::readFrame() {
     cap.release();   
 }
 
+
+void ImageProcess::ostrack_init(const QRect &roi) {
+    init_bbox = cv::Rect(
+        roi.x(),
+        roi.y(),
+        roi.width(),
+        roi.height()
+    );
+    is_init = true;
+}
 
 
 void ImageProcess::startCapture() {
@@ -178,5 +173,14 @@ void ImageProcess::endCapture() {
 
 
  void ImageProcess::changeNNStatus(){
-     m_nn_running = !m_nn_running;
+    std::string task_type = m_task_type.toStdString();
+    if(task_type == "MOT") {
+        int fps = cap.get(CAP_PROP_FPS);
+        m_infer -> tracker_init(fps, 30);
+        is_init = true;
+    }
+    else if(task_type == "VOT") {
+        m_tracker->init_tracker(m_frame, init_bbox);
+    }
+    m_nn_running = !m_nn_running;
  }

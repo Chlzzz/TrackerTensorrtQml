@@ -127,3 +127,8 @@ void ThreadController::setNvidiaGpuUsage(const int nvidiaGpuUsage){
 void ThreadController::startModelDetect() {
     emit sendModelStart();
 }
+
+
+void ThreadController::setROI(const QRect &roi) {
+    imageProcess->ostrack_init(roi);
+}
