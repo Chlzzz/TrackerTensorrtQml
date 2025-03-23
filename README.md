@@ -1,5 +1,5 @@
 
-# RTDETR + ByteTrack + QT 
+# RTDETR + ByteTrack, OSTrack, QT 
 ---
 **项目仅做参考，部分功能未完成**
 
@@ -15,8 +15,7 @@ Your_dir
     ├── qml                 ------ qml界面文件目录
     ├── src                 ------ 源文件目录
     ├── qml.qrc             ------ qml的资源文件，里面存放了`.qml`文件路径信息， 资源文件路径信息，qml主题文件路径信息，是编译所需的源文件
-    ├── bytetrack           ------ bytetrack部分
-    └─tensorRT_Pro_Model    ------ TensorRT_Pro部分
+    └── tensorRT_Pro_Model  ------ TensorRT_Pro部分
 
 qml
     ├── CalibratePage.qml   ------ 未完成
@@ -29,7 +28,8 @@ qml
     └── SettingPage.qml     ------ 未完成
 
 include/src
-    ├── app_rtdetr          ------ 管理RTDETR与ByteTrack节点
+    ├── node_rtdetr         ------ 管理RTDETR与ByteTrack节点
+    ├── node_ostrack        ------ 管理OSTrack节点
     ├── imageprocess        ------ 相机视频流读取，调用推理入口函数
     ├── main.cpp            ------ 将类暴露给qml
     ├── ocvimageprovider    ------ QImage 与 cv::Mat 格式转换
@@ -61,12 +61,13 @@ include/src
 
 
 ## 运行方式
-+ 需要生成TensorRT的 .trt 文件, 可参考[Blog](https://blog.csdn.net/qq_40672115/article/details/134356250)
++ 需要生成TensorRT的 .trt 文件, rtdetr可参考[Blog](https://blog.csdn.net/qq_40672115/article/details/134356250)，ostrack可参考repo：[Track-TrT](https://github.com/l-sf/Track-trt)
 + 编译  
   + cd build
   + cmake ..
   + make
 + 在根目录下 ./bin/NetWorkShow 按照正确的顺序选择摄像头序列，推理任务类别和模型位置，先点击`Save and Init Engine`初始化引擎，然后可以点击左边的`Start Capture`和`Start Model`
++ ostrack在`Start Model`前，需要在Image上选择ROI
 
 ## 运行截图
 
@@ -80,6 +81,7 @@ include/src
 ## 参考资源
 + [YoloV5RGBD](https://github.com/parker-int64/yolov5-RGBD)
 + [tensorRT_Pro](https://github.com/shouxieai/tensorRT_Pro)
++ [Track-TrT](https://github.com/l-sf/Track-trt)
 + [tensorRT_Pro_YOLOV8](https://github.com/Melody-Zhou/tensorRT_Pro-YOLOv8)
 + [ByteTrack](https://github.com/ifzhang/ByteTrack)
 
