@@ -65,67 +65,63 @@ Item {
                 // Reload image
                 function reload(){
                     source = ""
-                    source = "image://live/image1/" + Date.now()
+                    source = "image://live/image/" + Date.now()
                 }
                 // Set default image
                 function setDefault(){
                     source = "qrc:/assets/videocam.png"
                 }
 
-                RoiSetting {
-                    id: roiset
+                property point startPoint: Qt.point(0, 0)
+                property point endPoint: Qt.point(0, 0)
+                property bool selecting: false
+
+                Rectangle {
+                    id: roiRect
+                    color: "transparent"
+                    border.color: "red"
+                    border.width: 2
+                    visible: false
                 }
 
-//                property point startPoint: Qt.point(0, 0)
-//                property point endPoint: Qt.point(0, 0)
-//                property bool selecting: false
+                MouseArea {
+                    anchors.fill: parent
+                    onPressed: {
+                        imageRGB.startPoint = Qt.point(mouse.x, mouse.y)
+                        imageRGB.selecting = true
+                        roiRect.visible = true
+                    }
+                    onPositionChanged: {
+                        if (imageRGB.selecting) {
+                            imageRGB.endPoint = Qt.point(mouse.x, mouse.y)
+                            imageRGB.updateROIRect()
+                        }
+                    }
+                    onReleased: {
+                        imageRGB.endPoint = Qt.point(mouse.x, mouse.y)
+                        imageRGB.selecting = false
+                        roiRect.visible = false
+                        var roi = imageRGB.getROI()
+                        console.log("Selected ROI:", roi)
+                        controller.setROI(roi)
+                    }
+                }
 
-//                Rectangle {
-//                    id: roiRect
-//                    color: "transparent"
-//                    border.color: "red"
-//                    border.width: 2
-//                    visible: false
-//                }
+                function updateROIRect() {
+                    roiRect.x = Math.min(imageRGB.startPoint.x, imageRGB.endPoint.x)
+                    roiRect.y = Math.min(imageRGB.startPoint.y, imageRGB.endPoint.y)
+                    roiRect.width = Math.abs(imageRGB.endPoint.x - imageRGB.startPoint.x)
+                    roiRect.height = Math.abs(imageRGB.endPoint.y - imageRGB.startPoint.y)
+                }
 
-//                MouseArea {
-//                    anchors.fill: parent
-//                    onPressed: {
-//                        imageRGB.startPoint = Qt.point(mouse.x, mouse.y)
-//                        imageRGB.selecting = true
-//                        roiRect.visible = true
-//                    }
-//                    onPositionChanged: {
-//                        if (imageRGB.selecting) {
-//                            imageRGB.endPoint = Qt.point(mouse.x, mouse.y)
-//                            imageRGB.updateROIRect()
-//                        }
-//                    }
-//                    onReleased: {
-//                        imageRGB.endPoint = Qt.point(mouse.x, mouse.y)
-//                        imageRGB.selecting = false
-//                        roiRect.visible = false
-//                        var roi = imageRGB.getROI()
-//                        console.log("Selected ROI:", roi)
-//                        controller.setROI(roi)
-//                    }
-//                }
-
-//                function updateROIRect() {
-//                    roiRect.x = Math.min(imageRGB.startPoint.x, imageRGB.endPoint.x)
-//                    roiRect.y = Math.min(imageRGB.startPoint.y, imageRGB.endPoint.y)
-//                    roiRect.width = Math.abs(imageRGB.endPoint.x - imageRGB.startPoint.x)
-//                    roiRect.height = Math.abs(imageRGB.endPoint.y - imageRGB.startPoint.y)
-//                }
-
-//                function getROI() {
-//                    return Qt.rect(
-//                        Math.min(imageRGB.startPoint.x, imageRGB.endPoint.x),
-//                        Math.min(imageRGB.startPoint.y, imageRGB.endPoint.y),
-//                        Math.abs(imageRGB.endPoint.x - imageRGB.startPoint.x),
-//                        Math.abs(imageRGB.endPoint.y - imageRGB.startPoint.y)
-//                    )
-//                }
+                function getROI() {
+                    return Qt.rect(
+                        Math.min(imageRGB.startPoint.x, imageRGB.endPoint.x),
+                        Math.min(imageRGB.startPoint.y, imageRGB.endPoint.y),
+                        Math.abs(imageRGB.endPoint.x - imageRGB.startPoint.x),
+                        Math.abs(imageRGB.endPoint.y - imageRGB.startPoint.y)
+                    )
+                }
 
             }
         }
@@ -133,16 +129,17 @@ Item {
 
          Rectangle {
             id: controlCamPanel
-            height: 120
+            height: 90
             color: "#ffffff"
             anchors.left: canvas.right
             anchors.leftMargin: 40
             anchors.right: parent.right
+            anchors.rightMargin: 5
             anchors.top: canvas.top
 
             Text {
                 id: cameraText
-                text: qsTr("Camera or File")
+                text: qsTr("Camera Type")
                 anchors.top: parent.top
                 anchors.topMargin: 10
                 anchors.horizontalCenter: parent.horizontalCenter
@@ -150,44 +147,75 @@ Item {
                 font.family: "Fredoka Light"   
             }
 
-            Rectangle {
+
+            // 左边的 ComboBox
+            ComboBox {
+                id: camTypeBox
                 anchors.top: cameraText.bottom
-                height: 90
-                width: parent.width
-                SwipeView {
-                    id: swipeView
-                    clip: true
-                    interactive: false
-                    orientation: Qt.Horizontal
-                    currentIndex: pageIndicator.currentIndex
-                    anchors.left: parent.left
-                    anchors.leftMargin: 10
-                    Page {
-                        Column {
-                            id: camcol
-                            spacing: 2
-                            CamSelect{}
-                            CamSelect{}
-                        }
-                    }
-                    Page {
-                        Column {
-                            id: filecol
-                            spacing: 2
-                            FileSelect{}
-                            FileSelect{}
+                anchors.topMargin: 10
+                anchors.left: parent.left
+                anchors.leftMargin: 15
+                width: 90
+                height: 35
+                font.pixelSize: 15
+                font.family: "Fredoka Light"
+                model: ["USB", "RTSP"]
+                currentIndex: 0
+                onCurrentIndexChanged: {
+                    // 根据选项切换 Item A 和 Item B 的可见性
+                    usbComboBox.visible = (currentIndex === 0);
+                    rtspInput.visible = (currentIndex === 1);
+                }
+            }
+
+            // 右边的控件
+            Item {
+                anchors.top: camTypeBox.top
+                anchors.left: camTypeBox.right
+                anchors.leftMargin: 15
+                width:130
+                height:35
+                // USB 模式下的 ComboBox
+                ComboBox {
+                    id: usbComboBox
+                    anchors.fill: parent
+                    font.pixelSize: 15
+                    font.family: "Fredoka Light"
+                    model: [0, 1, 2, 3, 4, 5]
+                    currentIndex: 0
+                    visible: true // 默认显示
+                    onCurrentIndexChanged: {
+                        if (visible === true) {
+                            demoContent.paraList["cam_device"] = displayText
+                            demoContent.paraList["camera_type"] = camTypeBox.displayText
                         }
                     }
                 }
 
-                PageIndicator {
-                    id: pageIndicator
-                    anchors.bottom: parent.bottom
-                    anchors.horizontalCenter: parent.horizontalCenter
-
-                    interactive: true
-                    currentIndex: swipeView.currentIndex
-                    count: swipeView.count
+                Rectangle {
+                    id: rtspInput
+                    color: "#E8E8E8"
+                    anchors.fill: parent
+                    visible: false // 默认隐藏
+                    // RTSP 模式下的 TextInput
+                    TextInput {
+                        id: rtspAddress
+                        anchors.fill: parent // 填充整个 Rectangle
+                        anchors.margins: 5 // 设置边距
+                        verticalAlignment: Text.AlignVCenter // 垂直居中
+                        font.pixelSize: 15
+                        font.family: "Fredoka Light"
+                        text: qsTr("192.168.")
+                        validator: RegExpValidator {
+                            regExp: /^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/
+                        }
+                        onTextChanged: {
+                            if (visible === true) {
+                                demoContent.paraList["cam_device"] = text
+                                demoContent.paraList["camera_type"] = camTypeBox.displayText
+                            }
+                        }
+                    }
                 }
             }
          }
@@ -466,7 +494,7 @@ Item {
 
     Connections {
         target: liveImageProvider
-        function onImageChanged(camIndex) {
+        function onImageChanged() {
             imageRGB.reload()
         }
         Component.onDestruction: {

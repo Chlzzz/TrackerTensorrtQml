@@ -15,8 +15,8 @@
 #include <opencv2/highgui.hpp>
 
 #include "utility.h"
-//#include "node_rtdetr.h"
-//#include "node_ostrack.h"
+#include "node_rtdetr.h"
+#include "node_ostrack.h"
 
 #ifdef _DEBUG
     #include <QDebug>
@@ -74,8 +74,8 @@ private:
     bool is_init;
 
     // CPUInfer *infer;
-//    std::shared_ptr<AppRTdetr> m_infer;
-//    std::shared_ptr<AppOStrack>  m_tracker;
+    std::shared_ptr<AppRTdetr> m_infer;
+    std::shared_ptr<AppOStrack>  m_tracker;
     
 };
 

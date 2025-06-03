@@ -17,9 +17,9 @@ set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/workspace)
 # # 如果你的opencv找不到，可以自己指定目录
 # set(OpenCV_DIR   "/usr/local/include/opencv4")
 # set(CUDA_TOOLKIT_ROOT_DIR     "/usr/local/cuda")
-# set(CUDNN_DIR    "/home/heu/Packages/cudnn-8.8.1.3")
+# set(CUDNN_DIR    "/home/nh/Packages/cudnn-8.8.1.3")
 # # RT-DETR 必须指定高版本的 tensorRT
-# set(TENSORRT_DIR "/home/heu/Packages/TensorRT-8.6.1.6")
+# set(TENSORRT_DIR "/home/nh/Packages/TensorRT-8.6.1.6")
 # # 因为protobuf，需要用特定版本，所以这里指定路径
 # set(PROTOBUF_DIR "/usr/local/protobuf")
 
