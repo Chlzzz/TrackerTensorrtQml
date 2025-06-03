@@ -19,13 +19,13 @@ public:
     QImage requestImage(const QString& id, QSize* size, const QSize& requestedSize) override;
 
 public slots:
-    void updateImage(const QImage& image);
+    void updateImage(const QImage& image, int camIndex);
 
 signals:
-    void imageChanged();
+    void imageChanged(int camIndex);
 
 private:
-    QImage image;
+    QImage image1, image2;
     QMutex mutex;
 };
 
