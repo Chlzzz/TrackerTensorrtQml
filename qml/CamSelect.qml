@@ -1,5 +1,8 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
+import QtQuick.Dialogs 1.3
+
+import Qt.labs.platform 1.1
 
 Item {
     id: camSelect
@@ -16,12 +19,13 @@ Item {
         height: 35
         font.pixelSize: 15
         font.family: "Fredoka Light"
-        model: ["USB", "RTSP"]
+        model: ["USB", "RTSP", "VID", "DIR"]
         currentIndex: 0
         onCurrentIndexChanged: {
             // 根据选项切换 Item A 和 Item B 的可见性
             usbComboBox.visible = (currentIndex === 0);
             rtspInput.visible = (currentIndex === 1);
+            fileSelect.visible = (currentIndex === 2 || currentIndex === 3)
         }
     }
 
@@ -68,6 +72,54 @@ Item {
                         demoContent.paraList["cam_device"] = text
                         demoContent.paraList["camera_type"] = camTypeBox.displayText
                     }
+                }
+            }
+        }
+
+        Item{
+            id: fileSelect
+            anchors.fill: parent
+            visible: false // 默认隐藏
+            Text {
+                id: fileDir
+                anchors.fill: parent
+                font.pixelSize: 15
+                verticalAlignment: Text.AlignVCenter    // 文本垂直居中
+                leftPadding: 5                          // 左侧内边距，避免文本紧贴边框
+                elide: Text.ElideLeft                   // 文本过长，保留右边
+                font.family: "Fredoka Light"
+                text: qsTr("Path")
+            }
+            Image {
+                id: selectFile
+                width: 24
+                height: 24
+                anchors.verticalCenter: fileDir.verticalCenter
+                anchors.left: fileDir.right
+                source: "qrc:/assets/file_select.png"
+                anchors.leftMargin: 10
+                fillMode: Image.PreserveAspectFit
+
+                MouseArea{
+                    width: parent.width
+                    height: parent.height
+                    onClicked: {
+                        networkFolderDialog.open()
+                    }
+                }
+            }
+            FileDialog {
+                id: networkFolderDialog
+                title: camTypeBox.currentIndex === 3 ? "选择视频" : "选择序列目录"
+                //selectFolder: camTypeBox.currentIndex === 3
+                property string url: ""
+                onAccepted: {
+                    var url = networkFolderDialog.file
+                    fileDir.text = url.toString().slice(7)
+                    demoContent.paraList["cam_device"] = fileDir.text
+                }
+                onRejected: {
+                    fileDir.text = qsTr("Must provide a valid folder path...")
                 }
             }
         }

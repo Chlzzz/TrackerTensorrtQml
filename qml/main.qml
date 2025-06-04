@@ -9,10 +9,10 @@ Window {
         id: fredokaFont;
         source: "qrc:/assets/Fredoka-VariableFont_wdth,wght.ttf"
     }
-    width: 1280
-    height: 800
-    minimumWidth: 1280
-    minimumHeight: 800
+    width: 1920
+    height: 1080
+    minimumWidth: 1920
+    minimumHeight: 1080
     visible: true
     title: qsTr("NerualNetwork Tool")
 

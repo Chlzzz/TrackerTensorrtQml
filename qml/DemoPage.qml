@@ -7,7 +7,7 @@ import Qt.labs.platform 1.1
 
 Item {
     id: item1
-    width: 980
+    width: 1600
     height: 800
 
     Rectangle {
@@ -23,7 +23,7 @@ Item {
             "camera_type": "USB",
             "cam_device": "0",
             "infer_device": "Nvidia GPU",
-            "task_type": "Detection",
+            "task_type": "MOT",
             "network_directory": "./"
         }
 
@@ -38,25 +38,23 @@ Item {
 
         Rectangle{
             id: canvas
-            width: 660
+            width: 1300
             height: 500
             color: "transparent"
             border.color: "black"
             border.width: 3
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
-            anchors.leftMargin: 10
-            anchors.verticalCenterOffset: 0
+            anchors.leftMargin: 5
 
             Image {
                 id: imageRGB
-                y: 232
                 width: 640
                 height: 480
-                anchors.verticalCenter: parent.verticalCenter
                 source: "qrc:/assets/videocam.png"
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.verticalCenterOffset: 0
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.left: parent.left
+                anchors.leftMargin: 20
                 fillMode: Image.PreserveAspectFit
                 cache: false
                 asynchronous: false
@@ -128,6 +126,29 @@ Item {
 //                }
 
             }
+            Image {
+                id: imageIFR
+                width: 640
+                height: 480
+                source: "qrc:/assets/videocam.png"
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.left: imageRGB.right
+                anchors.leftMargin: 20
+                fillMode: Image.PreserveAspectFit
+                cache: false
+                asynchronous: false
+                sourceSize.width: 640
+                sourceSize.height: 480
+                // Reload image
+                function reload(){
+                    source = ""
+                    source = "image://live/image2/" + Date.now()
+                }
+                // Set default image
+                function setDefault(){
+                    source = "qrc:/assets/videocam.png"
+                }
+            }
         }
 
 
@@ -136,13 +157,13 @@ Item {
             height: 120
             color: "#ffffff"
             anchors.left: canvas.right
-            anchors.leftMargin: 40
+            anchors.leftMargin: 15
             anchors.right: parent.right
             anchors.top: canvas.top
 
             Text {
                 id: cameraText
-                text: qsTr("Camera or File")
+                text: qsTr("Source")
                 anchors.top: parent.top
                 anchors.topMargin: 10
                 anchors.horizontalCenter: parent.horizontalCenter
@@ -154,40 +175,11 @@ Item {
                 anchors.top: cameraText.bottom
                 height: 90
                 width: parent.width
-                SwipeView {
-                    id: swipeView
-                    clip: true
-                    interactive: false
-                    orientation: Qt.Horizontal
-                    currentIndex: pageIndicator.currentIndex
-                    anchors.left: parent.left
-                    anchors.leftMargin: 10
-                    Page {
-                        Column {
-                            id: camcol
-                            spacing: 2
-                            CamSelect{}
-                            CamSelect{}
-                        }
-                    }
-                    Page {
-                        Column {
-                            id: filecol
-                            spacing: 2
-                            FileSelect{}
-                            FileSelect{}
-                        }
-                    }
-                }
-
-                PageIndicator {
-                    id: pageIndicator
-                    anchors.bottom: parent.bottom
-                    anchors.horizontalCenter: parent.horizontalCenter
-
-                    interactive: true
-                    currentIndex: swipeView.currentIndex
-                    count: swipeView.count
+                Column {
+                    id: camcol
+                    spacing: 2
+                    CamSelect{}
+                    CamSelect{}
                 }
             }
          }
@@ -199,13 +191,13 @@ Item {
             anchors.top: controlCamPanel.bottom
             anchors.topMargin: 15
             anchors.left: canvas.right
-            anchors.leftMargin: 40
+            anchors.leftMargin: 15
             anchors.right: parent.right
-            anchors.rightMargin: 5
+
 
             Text {
                 id: inferDeviceText
-                text: qsTr("Inference Device")
+                text: qsTr("Device")
                 anchors.left: parent.left
                 anchors.top: parent.top
                 anchors.topMargin: 20
@@ -215,11 +207,11 @@ Item {
             }
 
             ComboBox {
-                id: inferDevide
-                width: 120
+                id: inferDevice
+                width: 130
                 height:35
-                anchors.left: inferDeviceText.right
-                anchors.leftMargin: 15
+                anchors.right: parent.right
+                anchors.rightMargin: 15
                 anchors.verticalCenter: inferDeviceText.verticalCenter
                 font.pixelSize: 14
                 font.family: "Fredoka Light"
@@ -242,10 +234,10 @@ Item {
 
             ComboBox {
                 id: modelTypeSelect
-                width: 120
+                width: 130
                 height:35
                 anchors.verticalCenter: modelTypeText.verticalCenter
-                anchors.horizontalCenter: inferDevide.horizontalCenter
+                anchors.horizontalCenter: inferDevice.horizontalCenter
                 font.pixelSize: 15
                 font.family: "Fredoka Light"
                 model: ["MOT", "VOT"]
@@ -467,7 +459,11 @@ Item {
     Connections {
         target: liveImageProvider
         function onImageChanged(camIndex) {
-            imageRGB.reload()
+            if(camIndex === 1){
+                imageRGB.reload()
+            }else if(camIndex === 2) {
+                imageIFR.reload()
+            }
         }
         Component.onDestruction: {
             controller.imageThreadFinished()

@@ -35,7 +35,7 @@ public:
     void ostrack_init(const QRect &roi);
 
 signals:
-    void sendImage(const QImage&);
+    void sendImage(const QImage&, int camIndex);
     void sendCameraError(const QString);
     void sendInferDeviceError(const QString);
     void sendInferDeviceSuccess();

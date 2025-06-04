@@ -13,8 +13,9 @@ ImageProcess::~ImageProcess(){
 
 }
 
+
 /// @brief convert opencv cv::Mat to qt QImage
-/// @param src 
+/// @param src sendImage
 /// @return QImage
 QImage ImageProcess::MatImageToQImage(const cv::Mat& src) {
     QImage returnImage;
@@ -53,6 +54,7 @@ QImage ImageProcess::MatImageToQImage(const cv::Mat& src) {
     }
     return returnImage;
 }
+
 
 void ImageProcess::initCapture(const std::string cameraIndex = "0", const double capWidth = 640,
     const double capHeight = 480) {
@@ -104,21 +106,21 @@ void ImageProcess::readFrame() {
 //                    cv::Mat infer_frame;
 //                    infer_frame = m_infer->process_image_and_track(m_frame);
 //                    m_q_frame = MatImageToQImage(infer_frame);
-//                    emit sendImage(m_q_frame);
+//                    emit sendImage(m_q_frame, 1);
 //                }
 //                else if(task_type == "VOT") {
 //                    cv::Mat infer_frame;
 //                    infer_frame = m_tracker->process_image_and_track(m_frame);
 //                    m_q_frame = MatImageToQImage(infer_frame);
-//                    emit sendImage(m_q_frame);
+//                    emit sendImage(m_q_frame, 1);
 //                }
 //            }
 //            else {
 //                    m_q_frame = MatImageToQImage(m_frame);
-//                    emit sendImage(m_q_frame);
+//                    emit sendImage(m_q_frame, 1);
 //                }
             m_q_frame = MatImageToQImage(m_frame);
-            emit sendImage(m_q_frame);
+            emit sendImage(m_q_frame, 1);
         }
     }
     cap.release();   

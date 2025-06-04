@@ -20,7 +20,7 @@ ThreadController::ThreadController(QObject* parent, OCVImageProvider* imageProvi
     connect(this, SIGNAL(operateImageThread(int)), imageProcess, SLOT(readFrame()));
     connect(this, SIGNAL(imageProcessExit()), imageProcess, SLOT(endCapture()), Qt::ConnectionType::DirectConnection);
     connect(&readingThread, &QThread::finished, imageProcess, &QObject::deleteLater);
-    connect(imageProcess, SIGNAL(sendImage(QImage)), imageProvider, SLOT(updateImage(QImage)));
+    connect(imageProcess, SIGNAL(sendImage(QImage, int)), imageProvider, SLOT(updateImage(QImage, int)));
 
     // // check the parameters...
     //connect(utility, &Utility::sendToThread, imageProcess, &ImageProcess::checkInferParameter, Qt::ConnectionType::DirectConnection);
