@@ -10,7 +10,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)
 
 # set(OpenCV_DIR   "/usr/local/include/opencv4")
 # set(CUDA_TOOLKIT_ROOT_DIR     "/usr/local/cuda")
-# set(TENSORRT_DIR "/home/nh/Packages/TensorRT-8.6.1.6")
+# set(TENSORRT_DIR "/home/heu/Packages/TensorRT-8.6.1.6")
 
 find_package(CUDA)
 find_package(OpenCV)

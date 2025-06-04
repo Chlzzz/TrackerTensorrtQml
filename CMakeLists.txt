@@ -5,15 +5,15 @@ project(NetWorkShow VERSION 0.1 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(CUDA_TOOLKIT_ROOT_DIR     "/usr/local/cuda")
-set(CUDNN_DIR    "/home/nh/Packages/cudnn-8.8.1.3")
-# RT-DETR 必须指定高版本的 tensorRT
-set(TENSORRT_DIR "/home/nh/Packages/TensorRT-8.6.1.6")
-# 因为protobuf，需要用特定版本，所以这里指定路径
-set(PROTOBUF_DIR "/usr/local/protobuf")
+#set(CUDA_TOOLKIT_ROOT_DIR     "/usr/local/cuda")
+#set(CUDNN_DIR    "/home/heu/Packages/cudnn-8.8.1.3")
+## RT-DETR 必须指定高版本的 tensorRT
+#set(TENSORRT_DIR "/home/heu/Packages/TensorRT-8.6.1.6")
+## 因为protobuf，需要用特定版本，所以这里指定路径
+#set(PROTOBUF_DIR "/usr/local/protobuf")
 
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tensorRT_Pro_Model)
+#add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tensorRT_Pro_Model)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 #set(CMAKE_AUTOUIC ON)
@@ -46,18 +46,18 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/include
     ${OpenCV_INCLUDE_DIRS}
 
-    ${CUDA_TOOLKIT_ROOT_DIR}/include
-    ${PROTOBUF_DIR}/include
-    ${TENSORRT_DIR}/include
-    ${CUDNN_DIR}/include
+#    ${CUDA_TOOLKIT_ROOT_DIR}/include
+#    ${PROTOBUF_DIR}/include
+#    ${TENSORRT_DIR}/include
+#    ${CUDNN_DIR}/include
 
 )
 
 link_directories(
-    ${PROTOBUF_DIR}/lib
-    ${TENSORRT_DIR}/lib
-    ${CUDA_TOOLKIT_ROOT_DIR}/lib64
-    ${CUDNN_DIR}/lib
+#    ${PROTOBUF_DIR}/lib
+#    ${TENSORRT_DIR}/lib
+#    ${CUDA_TOOLKIT_ROOT_DIR}/lib64
+#    ${CUDNN_DIR}/lib
     ${OpenCV_LIBS}
 )
 
@@ -68,8 +68,8 @@ set(PROJECT_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/include/threadcontroller.h
         ${CMAKE_CURRENT_SOURCE_DIR}/include/imageprocess.h
         ${CMAKE_CURRENT_SOURCE_DIR}/include/ocvimageprovider.h
-        ${CMAKE_CURRENT_SOURCE_DIR}/include/node_rtdetr.h
-        ${CMAKE_CURRENT_SOURCE_DIR}/include/node_ostrack.h
+#        ${CMAKE_CURRENT_SOURCE_DIR}/include/node_rtdetr.h
+#        ${CMAKE_CURRENT_SOURCE_DIR}/include/node_ostrack.h
         
         ${CMAKE_CURRENT_SOURCE_DIR}/src/utility.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/statusmonitor.cpp
@@ -77,8 +77,8 @@ set(PROJECT_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/src/threadcontroller.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/imageprocess.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/src/ocvimageprovider.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/node_rtdetr.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/node_ostrack.cpp
+#        ${CMAKE_CURRENT_SOURCE_DIR}/src/node_rtdetr.cpp
+#        ${CMAKE_CURRENT_SOURCE_DIR}/src/node_ostrack.cpp
         
         qml.qrc
 )
@@ -113,13 +113,13 @@ endif()
 target_compile_definitions(${PROJECT_NAME}
   PRIVATE $<$<OR:$<CONFIG:Debug>,$<CONFIG:RelWithDebInfo>>:QT_QML_DEBUG>)
 
-target_include_directories(${PROJECT_NAME} 
-  PRIVATE 
-      ${CMAKE_CURRENT_SOURCE_DIR}/tensorRT_Pro_Model/src/application
-      ${CMAKE_CURRENT_SOURCE_DIR}/tensorRT_Pro_Model/src/tensorRT
-      ${CMAKE_CURRENT_SOURCE_DIR}/tensorRT_Pro_Model/src/tensorRT/common
-      ${CMAKE_CURRENT_SOURCE_DIR}/tensorRT_Pro_Model/src/application/app_bytetrack/include
-)
+#target_include_directories(${PROJECT_NAME}
+#  PRIVATE
+#      ${CMAKE_CURRENT_SOURCE_DIR}/tensorRT_Pro_Model/src/application
+#      ${CMAKE_CURRENT_SOURCE_DIR}/tensorRT_Pro_Model/src/tensorRT
+#      ${CMAKE_CURRENT_SOURCE_DIR}/tensorRT_Pro_Model/src/tensorRT/common
+#      ${CMAKE_CURRENT_SOURCE_DIR}/tensorRT_Pro_Model/src/application/app_bytetrack/include
+#)
 
 target_link_libraries(${PROJECT_NAME}
   PRIVATE
@@ -128,9 +128,9 @@ target_link_libraries(${PROJECT_NAME}
       Qt${QT_VERSION_MAJOR}::Widgets
       ${OpenCV_LIBS}
 
-       trt_pro
-       bytetrack
-       plugin_list
+#       trt_pro
+#       bytetrack
+#       plugin_list
 )
 
 
