@@ -19,12 +19,15 @@ Item {
         radius: 20
         color: "transparent"
 
-        property var paraList : {
-            "camera_type": "USB",
-            "cam_device": "0",
+        property var paraList: {
+            "source_mode": "DUAL",
+            "source0_type": "USB",
+            "source0": "0",
+            "source1_type": "USB",
+            "source1": "0",
             "infer_device": "Nvidia GPU",
             "task_type": "MOT",
-            "network_directory": "./"
+            "network": ""
         }
 
         function stringifyAndSend(paraList){
@@ -178,8 +181,14 @@ Item {
                 Column {
                     id: camcol
                     spacing: 2
-                    CamSelect{}
-                    CamSelect{}
+                    CamSelect{
+                        paraList: demoContent.paraList
+                        is_source0: true
+                    }
+                    CamSelect{
+                        paraList: demoContent.paraList
+                        is_source0: false
+                    }
                 }
             }
          }
@@ -240,7 +249,7 @@ Item {
                 anchors.horizontalCenter: inferDevice.horizontalCenter
                 font.pixelSize: 15
                 font.family: "Fredoka Light"
-                model: ["MOT", "VOT"]
+                model: ["MOT", "VOT", "FUSION"]
                  onDisplayTextChanged: {
                      demoContent.paraList["task_type"] = displayText
                  }
@@ -486,6 +495,7 @@ Item {
         triggeredOnStart: true
         onTriggered: {
             imageRGB.setDefault()
+            imageIFR.setDefault()
         }
     }
 }

@@ -43,15 +43,21 @@ void Utility::receivedEngineStatusFalse(QString status) {
 
 void Utility::parseJSValue(QJSValue jsValue) {
     QJsonObject jsonObject = jsValue.toVariant().toJsonObject();
-    QString cameraType = jsonObject.value("camera_type").toString();
-    QString cameraDevice = jsonObject.value("cam_device").toString();
+    QString sourceMode = jsonObject.value("source_mode").toString();
+    QString source0Type = jsonObject.value("source0_type").toString();
+    QString source0 = jsonObject.value("source0").toString();
+    QString source1Type = jsonObject.value("source1_type").toString();
+    QString source1 = jsonObject.value("source1").toString();
     QString inferDevice = jsonObject.value("infer_device").toString();
     QString NetworkDir = jsonObject.value("network_directory").toString();
     QString TaskType = jsonObject.value("task_type").toString();
 
     QStringList capturePara;
-    capturePara.push_back(cameraType);
-    capturePara.push_back(cameraDevice);
+//    capturePara.push_back(sourceMode);
+    capturePara.push_back(source0Type);
+    capturePara.push_back(source0);
+    capturePara.push_back(source1Type);
+    capturePara.push_back(source1);
 
     QStringList inferPara;
     inferPara.push_back(inferDevice);
@@ -62,8 +68,8 @@ void Utility::parseJSValue(QJSValue jsValue) {
 
 #ifdef _DEBUG
 // uncomment the following debug to match the result if something went sideway
-    qDebug() << "cameraType is: " << cameraType;
-    qDebug() << "cameraDevice is: " << cameraDevice;
+//    qDebug() << "cameraType is: " << cameraType;
+//    qDebug() << "cameraDevice is: " << cameraDevice;
     qDebug() << "infer device is: " << inferDevice;
     qDebug() << "NetworkDir is: " << NetworkDir;
     qDebug() << "TaskType is: " << TaskType;

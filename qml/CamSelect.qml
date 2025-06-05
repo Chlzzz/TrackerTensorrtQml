@@ -9,15 +9,18 @@ Item {
     width: 250  // 显式设置宽度（根据内容调整）
     height: 40  // 显式设置高度（ComboBox 高度 + 边距）
 
+    property var paraList
+    property bool is_source0
+
     // 左边的 ComboBox
     ComboBox {
         id: camTypeBox
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.leftMargin: 15
-        width: 90
+        width: 80
         height: 35
-        font.pixelSize: 15
+        font.pixelSize: 12
         font.family: "Fredoka Light"
         model: ["USB", "RTSP", "VID", "DIR"]
         currentIndex: 0
@@ -31,24 +34,28 @@ Item {
 
     // 右边的控件
     Item {
+        id: sourceComponent
         anchors.top: parent.top
         anchors.left: camTypeBox.right
-        anchors.leftMargin: 15
+        anchors.leftMargin: 10
         width:120
         height:35
         // USB 模式下的 ComboBox
         ComboBox {
             id: usbComboBox
             anchors.fill: parent
-            font.pixelSize: 15
+            font.pixelSize: 12
             font.family: "Fredoka Light"
             model: [0, 1, 2, 3, 4, 5]
             currentIndex: 0
             visible: true // 默认显示
             onCurrentIndexChanged: {
-                if (visible === true) {
-                    demoContent.paraList["cam_device"] = displayText
-                    demoContent.paraList["camera_type"] = camTypeBox.displayText
+                if (visible === true && is_source0 === true) {
+                    paraList["source0"] = displayText
+                    paraList["source0_type"] = camTypeBox.displayText
+                } else {
+                    paraList["source1"] = displayText
+                    paraList["source1_type"] = camTypeBox.displayText
                 }
             }
         }
@@ -64,13 +71,16 @@ Item {
                 anchors.fill: parent // 填充整个 Rectangle
                 anchors.margins: 5 // 设置边距
                 verticalAlignment: Text.AlignVCenter // 垂直居中
-                font.pixelSize: 15
+                font.pixelSize: 12
                 font.family: "Fredoka Light"
                 text: qsTr("192.168.")
                 onTextChanged: {
-                    if (visible === true) {
-                        demoContent.paraList["cam_device"] = text
-                        demoContent.paraList["camera_type"] = camTypeBox.displayText
+                    if (visible === true && is_source0 === true) {
+                        paraList["source0"] = displayText
+                        paraList["source0_type"] = camTypeBox.displayText
+                    } else {
+                        paraList["source1"] = displayText
+                        paraList["source1_type"] = camTypeBox.displayText
                     }
                 }
             }
@@ -83,7 +93,7 @@ Item {
             Text {
                 id: fileDir
                 anchors.fill: parent
-                font.pixelSize: 15
+                font.pixelSize: 12
                 verticalAlignment: Text.AlignVCenter    // 文本垂直居中
                 leftPadding: 5                          // 左侧内边距，避免文本紧贴边框
                 elide: Text.ElideLeft                   // 文本过长，保留右边
@@ -116,12 +126,32 @@ Item {
                 onAccepted: {
                     var url = networkFolderDialog.file
                     fileDir.text = url.toString().slice(7)
-                    demoContent.paraList["cam_device"] = fileDir.text
+                    if (is_source0 === true) {
+                        paraList["source0"] = displayText
+                        paraList["source0_type"] = camTypeBox.displayText
+                    } else {
+                        paraList["source1"] = displayText
+                        paraList["source1_type"] = camTypeBox.displayText
+                    }
                 }
                 onRejected: {
                     fileDir.text = qsTr("Must provide a valid folder path...")
                 }
             }
         }
+    }
+
+    Button {
+       text: "Save"
+       font.pixelSize: 12
+       font.family: "Fredoka Light"
+       width:50
+       height: 35
+       anchors.left: sourceComponent.right
+       anchors.verticalCenter: sourceComponent.verticalCenter
+       onClicked: {
+           localParaList = JSON.parse(JSON.stringify(paraList));
+           paraListArray.push(localParaList);
+       }
     }
 }

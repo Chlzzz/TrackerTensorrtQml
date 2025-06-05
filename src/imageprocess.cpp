@@ -56,59 +56,68 @@ QImage ImageProcess::MatImageToQImage(const cv::Mat& src) {
 }
 
 
-void ImageProcess::initCapture(const std::string cameraIndex = "0", const double capWidth = 640,
+void ImageProcess::initCapture(const double capWidth = 640,
     const double capHeight = 480) {
-#ifdef USE_VIDEO
-    cap.open("./video/output.avi");
-#else
-    cap.open(std::stoi(cameraIndex), cv::CAP_V4L2);
-    cap.set(cv::CAP_PROP_FRAME_WIDTH, capWidth);
-    cap.set(cv::CAP_PROP_FRAME_HEIGHT, capHeight);
-#endif
 
-    if(!cap.isOpened()) {
-#ifdef _DEBUG
-        qDebug() << "Failed to open the camera or video file. ";
-#endif  
-        m_image_process_running = false;
-        runtime_error = "Error, unable to open the camera";
-        cap.release();
-        emit sendCameraError(runtime_error);
-        return; 
-    } else {
-        m_image_process_running = true;
+    if(m_source_array[0].m_source_type == "DIR")
+        return;
+    for(auto& cap : m_cap_array) {
+        if (cap.isOpened()) cap.release();
     }
+
+    cv::VideoCapture cap;
+    for(const auto& element : m_source_array) {
+        if(element.m_source_type == "USB") {
+            cap.open(std::stoi(element.m_source), cv::CAP_ANY);
+//            cap.open(std::stoi(element.m_source), cv::CAP_V4L2);
+        }
+        else {
+            cap.open(element.m_source, cv::CAP_ANY);
+        }
+
+        if(!cap.isOpened()) {
+    #ifdef _DEBUG
+            qDebug() << "Failed to open the camera or video file. ";
+    #endif
+            m_image_process_running = false;
+            runtime_error = "Error, unable to open the camera";
+            cap.release();
+            emit sendCameraError(runtime_error);
+            return;
+        }
+
+        cap.set(cv::CAP_PROP_FRAME_WIDTH, capWidth);
+        cap.set(cv::CAP_PROP_FRAME_HEIGHT, capHeight);
+        m_cap_array.push_back(std::move(cap));
+    }
+    m_image_process_running = true;
 }
 
 
 void ImageProcess::readFrame() {
 
-    initCapture(m_camera_index.toStdString());
+    initCapture();
     
-    std::string task_type = m_task_type.toStdString();
- 
     while(m_image_process_running) {
-        cap.read(m_frame);
-#ifdef USE_VIDEO
-        cv::waitKey(33);
-#endif
-        if(m_frame.empty()) {
-#ifdef USB_VIDEO
-            qDebug() << "Frame is empty, will break now";
-#endif
-            cap.release();
-            break;
+        for(int i = 0; i < m_cap_array.size(); ++i) {
+            m_cap_array[i].read(m_mat_array[i]);
+            if(m_source_array[i].m_source_type == "VID") {
+                cv::waitKey(33);
+            }
+            if(m_mat_array[i].empty()) {
+                m_cap_array[i].release();
+                break;
+            }
         }
-        else {
-            // 模型推理部分
+        // 模型推理部分
 //            if(m_nn_running && is_init) {
-//                if(task_type == "MOT") {
+//                if(m_task_type == "MOT") {
 //                    cv::Mat infer_frame;
 //                    infer_frame = m_infer->process_image_and_track(m_frame);
 //                    m_q_frame = MatImageToQImage(infer_frame);
 //                    emit sendImage(m_q_frame, 1);
 //                }
-//                else if(task_type == "VOT") {
+//                else if(m_task_type == "VOT") {
 //                    cv::Mat infer_frame;
 //                    infer_frame = m_tracker->process_image_and_track(m_frame);
 //                    m_q_frame = MatImageToQImage(infer_frame);
@@ -119,11 +128,14 @@ void ImageProcess::readFrame() {
 //                    m_q_frame = MatImageToQImage(m_frame);
 //                    emit sendImage(m_q_frame, 1);
 //                }
-            m_q_frame = MatImageToQImage(m_frame);
-            emit sendImage(m_q_frame, 1);
+        for(int i = 0; i < m_mat_array.size(); ++i) {
+            emit sendImage(MatImageToQImage(m_mat_array[i]), i);
         }
+
     }
-    cap.release();   
+    for(auto& cap : m_cap_array) {
+        if (cap.isOpened()) cap.release();
+    }
 }
 
 
@@ -149,20 +161,26 @@ void ImageProcess::endCapture() {
 
 
  void ImageProcess::initengine(QStringList capturePara, QStringList inferPara) {
-    m_camera_index = capturePara[1];
-    m_full_network_path = inferPara[1];
-    m_task_type = inferPara[2];
 
-    QFileInfo fileInfo(m_full_network_path);
-    if(!fileInfo.exists()) {
-        m_nn_running = false;
-#ifdef _DEBUG
-        QString m_error_infer_device = "Error, unable to locate network file.\n";
-        qDebug() << m_error_infer_device;
-#endif
-        runtime_error = "Error, unable to locate  network file.";
-        emit sendInferDeviceError(runtime_error);
-        return ;
+     QFileInfo fileInfo(inferPara[1]);
+     if(!fileInfo.exists()) {
+         m_nn_running = false;
+ #ifdef _DEBUG
+         QString m_error_infer_device = "Error, unable to locate network file.\n";
+         qDebug() << m_error_infer_device;
+ #endif
+         runtime_error = "Error, unable to locate  network file.";
+         emit sendInferDeviceError(runtime_error);
+         return ;
+     }
+
+    m_full_network_path = inferPara[1].toStdString();
+    m_task_type = inferPara[2].toStdString();
+    sourcePara sp;
+    for(int i = 0; i != capturePara.size() / 2; ++i) {
+        sp.m_source_type = capturePara[2 * i].toStdString();
+        sp.m_source = capturePara[2 * i + 1].toStdString();
+        m_source_array.push_back(std::move(sp));
     }
 
 //    if(m_task_type == "MOT") {

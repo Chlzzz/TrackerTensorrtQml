@@ -22,6 +22,11 @@
     #include <QDebug>
 #endif
 
+struct sourcePara {
+    std::string m_source_type;
+    std::string m_source;
+};
+
 class ImageProcess : public QObject {
     Q_OBJECT
     Q_DISABLE_COPY(ImageProcess)
@@ -31,7 +36,7 @@ public:
     ~ImageProcess();
 
     QImage MatImageToQImage(const cv::Mat& src);
-    void initCapture(const std::string cameraIndex, const double capWidth, const double capHeight);
+    void initCapture(const double capWidth, const double capHeight);
     void ostrack_init(const QRect &roi);
 
 signals:
@@ -54,8 +59,10 @@ private:
     QMutex mutex;
     QMutex image_process_mutex;
 
-    cv::VideoCapture cap;
-    cv::Mat m_frame;
+
+    std::vector<cv::VideoCapture> m_cap_array;
+    std::vector<cv::Mat> m_mat_array;
+
     cv::Rect init_bbox;
     QImage m_q_frame;
 
@@ -63,12 +70,11 @@ private:
     bool m_nn_running;
     bool m_full_demo_running;
 
-    QString m_camera_type;
-    QString m_camera_index;
+    std::vector<sourcePara> m_source_array;
 //    int m_capture_width;
 //    int m_capture_height;
-    QString m_task_type;
-    QString m_full_network_path;
+    std::string m_task_type;
+    std::string m_full_network_path;
     QString runtime_error;
 
     bool is_init;
