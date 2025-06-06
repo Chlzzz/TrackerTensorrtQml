@@ -1,5 +1,17 @@
 #include "imageprocess.h"
 
+
+// 解析图片地址
+static std::pair<std::string, std::string> parse_image_path(const std::string& image_path) {
+    size_t last_slash = image_path.find_last_of("/\\");
+    size_t last_dot = image_path.find_last_of('.');
+
+    std::string dir = (last_slash == std::string::npos) ? "" : image_path.substr(0, last_slash);
+    std::string ext = (last_dot == std::string::npos) ? ".jpg" : image_path.substr(last_dot);
+
+    return {dir, "*" + ext};
+}
+
 ImageProcess::ImageProcess(QObject* parent) : QObject(parent) {
     m_image_process_running = false;
     m_nn_running = false;
@@ -59,56 +71,95 @@ QImage ImageProcess::MatImageToQImage(const cv::Mat& src) {
 void ImageProcess::initCapture(const double capWidth = 640,
     const double capHeight = 480) {
 
-    if(m_source_array[0].m_source_type == "DIR")
-        return;
-    for(auto& cap : m_cap_array) {
-        if (cap.isOpened()) cap.release();
+//    qDebug() << "Called " << __FUNCTION__;
+    // 选择图片序列时，生成图片序列名
+    if(m_source_array[0].m_source_type == "DIR") {
+        for(int i = 0; i < m_source_array.size(); ++i) {
+            std::pair<std::string, std::string> m_pair = parse_image_path(m_source_array[i].m_source);
+            std::vector<std::string> image_paths;
+            cv::glob(m_pair.first + "/" + m_pair.second, image_paths, false);
+            sort(image_paths.begin(), image_paths.end());
+            m_dir_array.emplace_back(std::move(image_paths));
+        }
     }
-
-    cv::VideoCapture cap;
-    for(const auto& element : m_source_array) {
-        if(element.m_source_type == "USB") {
-            cap.open(std::stoi(element.m_source), cv::CAP_ANY);
-//            cap.open(std::stoi(element.m_source), cv::CAP_V4L2);
-        }
-        else {
-            cap.open(element.m_source, cv::CAP_ANY);
+    // 其他则初始化capture
+    else {
+        for(auto& cap : m_cap_array) {
+            if (cap.isOpened()) cap.release();
         }
 
-        if(!cap.isOpened()) {
-    #ifdef _DEBUG
-            qDebug() << "Failed to open the camera or video file. ";
-    #endif
-            m_image_process_running = false;
-            runtime_error = "Error, unable to open the camera";
-            cap.release();
-            emit sendCameraError(runtime_error);
-            return;
-        }
+        cv::VideoCapture cap;
+        for(const auto& element : m_source_array) {
+            if(element.m_source_type == "USB") {
+                cap.open(std::stoi(element.m_source), cv::CAP_ANY);
+    //            cap.open(std::stoi(element.m_source), cv::CAP_V4L2);
+            }
+            else {
+                cap.open(element.m_source, cv::CAP_ANY);
+            }
 
-        cap.set(cv::CAP_PROP_FRAME_WIDTH, capWidth);
-        cap.set(cv::CAP_PROP_FRAME_HEIGHT, capHeight);
-        m_cap_array.push_back(std::move(cap));
+            if(!cap.isOpened()) {
+        #ifdef _DEBUG
+                qDebug() << "Failed to open the camera or video file. ";
+        #endif
+                m_image_process_running = false;
+                runtime_error = "Error, unable to open the camera";
+                cap.release();
+                emit sendCameraError(runtime_error);
+                return;
+            }
+
+            cap.set(cv::CAP_PROP_FRAME_WIDTH, capWidth);
+            cap.set(cv::CAP_PROP_FRAME_HEIGHT, capHeight);
+            m_cap_array.emplace_back(std::move(cap));
+        }
     }
     m_image_process_running = true;
+
+}
+
+bool ImageProcess::grabFrame(size_t currentid) {
+
+    qDebug() << "Called " << __FUNCTION__;
+    bool is_empty = false;
+    cv::Mat m_frame;
+    if(m_source_array[0].m_source_type == "DIR") {
+        for(int i = 0; i < m_dir_array.size(); ++i) {
+            if(currentid >= m_dir_array[i].size()) {
+                is_empty = true;
+            }
+            m_frame = cv::imread(m_dir_array[i][currentid]);
+            m_mat_array.emplace_back(std::move(m_frame));
+        }
+    }
+    else {
+        for(int i = 0; i < m_cap_array.size(); ++i) {
+            m_cap_array[i].read(m_frame);
+//            if(m_source_array[i].m_source_type == "VID") {
+//                cv::waitKey(33);
+//            }
+            if(m_frame.empty()) {
+                m_cap_array[i].release();
+                is_empty = true;
+            }
+            m_mat_array.emplace_back(std::move(m_frame));
+        }
+    }
+    return is_empty;
 }
 
 
 void ImageProcess::readFrame() {
 
+//    qDebug() << "Called " << __FUNCTION__;
     initCapture();
-    
+    size_t currentid = 0;
     while(m_image_process_running) {
-        for(int i = 0; i < m_cap_array.size(); ++i) {
-            m_cap_array[i].read(m_mat_array[i]);
-            if(m_source_array[i].m_source_type == "VID") {
-                cv::waitKey(33);
-            }
-            if(m_mat_array[i].empty()) {
-                m_cap_array[i].release();
-                break;
-            }
-        }
+        bool is_empty = false;
+        is_empty = grabFrame(currentid++);
+        cv::waitKey(33);
+        if(is_empty)
+            break;
         // 模型推理部分
 //            if(m_nn_running && is_init) {
 //                if(m_task_type == "MOT") {
@@ -131,7 +182,6 @@ void ImageProcess::readFrame() {
         for(int i = 0; i < m_mat_array.size(); ++i) {
             emit sendImage(MatImageToQImage(m_mat_array[i]), i);
         }
-
     }
     for(auto& cap : m_cap_array) {
         if (cap.isOpened()) cap.release();
@@ -180,7 +230,7 @@ void ImageProcess::endCapture() {
     for(int i = 0; i != capturePara.size() / 2; ++i) {
         sp.m_source_type = capturePara[2 * i].toStdString();
         sp.m_source = capturePara[2 * i + 1].toStdString();
-        m_source_array.push_back(std::move(sp));
+        m_source_array.emplace_back(std::move(sp));
     }
 
 //    if(m_task_type == "MOT") {
@@ -195,7 +245,7 @@ void ImageProcess::endCapture() {
 
 
  void ImageProcess::changeNNStatus(){
-    std::string task_type = m_task_type.toStdString();
+    std::string task_type = m_task_type;
 //    if(task_type == "MOT") {
 //        int fps = cap.get(CAP_PROP_FPS);
 //        m_infer -> tracker_init(fps, 30);
@@ -206,3 +256,6 @@ void ImageProcess::endCapture() {
 //    }
     m_nn_running = !m_nn_running;
  }
+
+
+

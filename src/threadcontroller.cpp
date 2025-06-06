@@ -67,6 +67,7 @@ void ThreadController::monitorThreadFinished(){
 }
 
 void ThreadController::imageThreadStart(){
+//    qDebug() << "Called " << __FUNCTION__;
     readingThread.start();
     emit operateImageThread(0);
 }

@@ -26,6 +26,6 @@
         <file>qml/SettingPage.qml</file>
         <file>assets/ms_ubuntu.png</file>
         <file>qml/RoiSetting.qml</file>
-        <file>qml/CamSelect.qml</file>
+        <file>qml/SourceSelect.qml</file>
     </qresource>
 </RCC>

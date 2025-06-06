@@ -48,6 +48,7 @@ signals:
 public slots:
     void startCapture();
     void readFrame();
+    bool grabFrame(size_t currentid);
     void endCapture();
 
     void initengine(QStringList capturePara, QStringList inferPara);
@@ -62,6 +63,7 @@ private:
 
     std::vector<cv::VideoCapture> m_cap_array;
     std::vector<cv::Mat> m_mat_array;
+    std::vector<std::vector<std::string> > m_dir_array;
 
     cv::Rect init_bbox;
     QImage m_q_frame;

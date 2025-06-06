@@ -5,7 +5,7 @@ import QtQuick.Dialogs 1.3
 import Qt.labs.platform 1.1
 
 Item {
-    id: camSelect
+    id: sourceSelect
     width: 250  // 显式设置宽度（根据内容调整）
     height: 40  // 显式设置高度（ComboBox 高度 + 边距）
 
@@ -53,7 +53,7 @@ Item {
                 if (visible === true && is_source0 === true) {
                     paraList["source0"] = displayText
                     paraList["source0_type"] = camTypeBox.displayText
-                } else {
+                } else if (visible === true) {
                     paraList["source1"] = displayText
                     paraList["source1_type"] = camTypeBox.displayText
                 }
@@ -78,7 +78,7 @@ Item {
                     if (visible === true && is_source0 === true) {
                         paraList["source0"] = displayText
                         paraList["source0_type"] = camTypeBox.displayText
-                    } else {
+                    }else if (visible === true) {
                         paraList["source1"] = displayText
                         paraList["source1_type"] = camTypeBox.displayText
                     }
@@ -120,17 +120,18 @@ Item {
             }
             FileDialog {
                 id: networkFolderDialog
-                title: camTypeBox.currentIndex === 3 ? "选择视频" : "选择序列目录"
+                title:  "选择文件"
+                //title: camTypeBox.currentIndex === 3 ? "选择视频" : "选择序列目录"
                 //selectFolder: camTypeBox.currentIndex === 3
                 property string url: ""
                 onAccepted: {
                     var url = networkFolderDialog.file
                     fileDir.text = url.toString().slice(7)
                     if (is_source0 === true) {
-                        paraList["source0"] = displayText
+                        paraList["source0"] = fileDir.text
                         paraList["source0_type"] = camTypeBox.displayText
                     } else {
-                        paraList["source1"] = displayText
+                        paraList["source1"] = fileDir.text
                         paraList["source1_type"] = camTypeBox.displayText
                     }
                 }
@@ -141,17 +142,17 @@ Item {
         }
     }
 
-    Button {
-       text: "Save"
-       font.pixelSize: 12
-       font.family: "Fredoka Light"
-       width:50
-       height: 35
-       anchors.left: sourceComponent.right
-       anchors.verticalCenter: sourceComponent.verticalCenter
-       onClicked: {
-           localParaList = JSON.parse(JSON.stringify(paraList));
-           paraListArray.push(localParaList);
-       }
-    }
+//    Button {00
+//       text: "Save"
+//       font.pixelSize: 12
+//       font.family: "Fredoka Light"
+//       width:50
+//       height: 35
+//       anchors.left: sourceComponent.right
+//       anchors.verticalCenter: sourceComponent.verticalCenter
+//       onClicked: {
+//           localParaList = JSON.parse(JSON.stringify(paraList));
+//           paraListArray.push(localParaList);
+//       }
+//    }
 }

@@ -65,8 +65,8 @@ Item {
                 sourceSize.height: 480
                 // Reload image
                 function reload(){
-                    source = ""
-                    source = "image://live/image1/" + Date.now()
+//                    source = ""
+                    source = "image://live/image0?" + Date.now()
                 }
                 // Set default image
                 function setDefault(){
@@ -144,8 +144,8 @@ Item {
                 sourceSize.height: 480
                 // Reload image
                 function reload(){
-                    source = ""
-                    source = "image://live/image2/" + Date.now()
+//                    source = ""
+                    source = "image://live/image1?" + Date.now()
                 }
                 // Set default image
                 function setDefault(){
@@ -181,11 +181,11 @@ Item {
                 Column {
                     id: camcol
                     spacing: 2
-                    CamSelect{
+                    SourceSelect{
                         paraList: demoContent.paraList
                         is_source0: true
                     }
-                    CamSelect{
+                    SourceSelect{
                         paraList: demoContent.paraList
                         is_source0: false
                     }
@@ -468,9 +468,9 @@ Item {
     Connections {
         target: liveImageProvider
         function onImageChanged(camIndex) {
-            if(camIndex === 1){
+            if(camIndex === 0){
                 imageRGB.reload()
-            }else if(camIndex === 2) {
+            }else if(camIndex === 1) {
                 imageIFR.reload()
             }
         }

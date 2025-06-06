@@ -25,7 +25,7 @@ signals:
     void imageChanged(int camIndex);
 
 private:
-    QImage image1, image2;
+    QImage image0, image1;
     QMutex mutex;
 };
 

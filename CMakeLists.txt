@@ -58,7 +58,7 @@ link_directories(
 #    ${TENSORRT_DIR}/lib
 #    ${CUDA_TOOLKIT_ROOT_DIR}/lib64
 #    ${CUDNN_DIR}/lib
-    ${OpenCV_LIBS}
+    ${OpenCV_LIBRARIES}
 )
 
 
