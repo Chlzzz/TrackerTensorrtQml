@@ -19,14 +19,15 @@ public:
     QImage requestImage(const QString& id, QSize* size, const QSize& requestedSize) override;
 
 public slots:
-    void updateImage(const QImage& image, int camIndex);
+
+    void updateImage(const QImage& image, int index);
 
 signals:
-    void imageChanged(int camIndex);
+    void imageChanged(int index);
 
 private:
     QImage image0, image1;
-    QMutex mutex;
+    QMutex m_mutex;
 };
 
 #endif // OCVIMAGEPROVIDER_H

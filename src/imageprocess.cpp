@@ -120,13 +120,15 @@ void ImageProcess::initCapture(const double capWidth = 640,
 
 bool ImageProcess::grabFrame(size_t currentid) {
 
-    qDebug() << "Called " << __FUNCTION__;
     bool is_empty = false;
+    bool is_vector_empty = true;
     cv::Mat m_frame;
     if(m_source_array[0].m_source_type == "DIR") {
+        m_mat_array.clear();
         for(int i = 0; i < m_dir_array.size(); ++i) {
             if(currentid >= m_dir_array[i].size()) {
                 is_empty = true;
+                break;
             }
             m_frame = cv::imread(m_dir_array[i][currentid]);
             m_mat_array.emplace_back(std::move(m_frame));
@@ -157,9 +159,9 @@ void ImageProcess::readFrame() {
     while(m_image_process_running) {
         bool is_empty = false;
         is_empty = grabFrame(currentid++);
-        cv::waitKey(33);
-        if(is_empty)
+        if(is_empty) {
             break;
+        }
         // 模型推理部分
 //            if(m_nn_running && is_init) {
 //                if(m_task_type == "MOT") {
@@ -179,12 +181,18 @@ void ImageProcess::readFrame() {
 //                    m_q_frame = MatImageToQImage(m_frame);
 //                    emit sendImage(m_q_frame, 1);
 //                }
+
+
         for(int i = 0; i < m_mat_array.size(); ++i) {
-            emit sendImage(MatImageToQImage(m_mat_array[i]), i);
+            m_q_frame = MatImageToQImage(m_mat_array[i]);
+            emit sendImage(m_q_frame, i);
         }
-    }
-    for(auto& cap : m_cap_array) {
-        if (cap.isOpened()) cap.release();
+
+        if(m_cap_array.size() != 0) {
+            for(auto& cap : m_cap_array) {
+                if (cap.isOpened()) cap.release();
+            }
+        }
     }
 }
 

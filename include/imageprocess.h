@@ -40,7 +40,8 @@ public:
     void ostrack_init(const QRect &roi);
 
 signals:
-    void sendImage(const QImage&, int camIndex);
+    void sendImage(const std::vector<QImage>&);
+    void sendImage(const QImage, int index);
     void sendCameraError(const QString);
     void sendInferDeviceError(const QString);
     void sendInferDeviceSuccess();

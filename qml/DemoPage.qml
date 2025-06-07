@@ -57,7 +57,6 @@ Item {
                 source: "qrc:/assets/videocam.png"
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.left: parent.left
-                anchors.leftMargin: 20
                 fillMode: Image.PreserveAspectFit
                 cache: false
                 asynchronous: false
@@ -65,70 +64,19 @@ Item {
                 sourceSize.height: 480
                 // Reload image
                 function reload(){
-//                    source = ""
-                    source = "image://live/image0?" + Date.now()
+                    source = ""
+                    source = "image://live/image0/" + Date.now()
                 }
                 // Set default image
                 function setDefault(){
                     source = "qrc:/assets/videocam.png"
                 }
 
-                RoiSetting {
-                    id: roiset
-                }
-
-//                property point startPoint: Qt.point(0, 0)
-//                property point endPoint: Qt.point(0, 0)
-//                property bool selecting: false
-
-//                Rectangle {
-//                    id: roiRect
-//                    color: "transparent"
-//                    border.color: "red"
-//                    border.width: 2
-//                    visible: false
+//                RoiSetting {
+//                    id: roiset
 //                }
-
-//                MouseArea {
-//                    anchors.fill: parent
-//                    onPressed: {
-//                        imageRGB.startPoint = Qt.point(mouse.x, mouse.y)
-//                        imageRGB.selecting = true
-//                        roiRect.visible = true
-//                    }
-//                    onPositionChanged: {
-//                        if (imageRGB.selecting) {
-//                            imageRGB.endPoint = Qt.point(mouse.x, mouse.y)
-//                            imageRGB.updateROIRect()
-//                        }
-//                    }
-//                    onReleased: {
-//                        imageRGB.endPoint = Qt.point(mouse.x, mouse.y)
-//                        imageRGB.selecting = false
-//                        roiRect.visible = false
-//                        var roi = imageRGB.getROI()
-//                        console.log("Selected ROI:", roi)
-//                        controller.setROI(roi)
-//                    }
-//                }
-
-//                function updateROIRect() {
-//                    roiRect.x = Math.min(imageRGB.startPoint.x, imageRGB.endPoint.x)
-//                    roiRect.y = Math.min(imageRGB.startPoint.y, imageRGB.endPoint.y)
-//                    roiRect.width = Math.abs(imageRGB.endPoint.x - imageRGB.startPoint.x)
-//                    roiRect.height = Math.abs(imageRGB.endPoint.y - imageRGB.startPoint.y)
-//                }
-
-//                function getROI() {
-//                    return Qt.rect(
-//                        Math.min(imageRGB.startPoint.x, imageRGB.endPoint.x),
-//                        Math.min(imageRGB.startPoint.y, imageRGB.endPoint.y),
-//                        Math.abs(imageRGB.endPoint.x - imageRGB.startPoint.x),
-//                        Math.abs(imageRGB.endPoint.y - imageRGB.startPoint.y)
-//                    )
-//                }
-
             }
+
             Image {
                 id: imageIFR
                 width: 640
@@ -136,7 +84,7 @@ Item {
                 source: "qrc:/assets/videocam.png"
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.left: imageRGB.right
-                anchors.leftMargin: 20
+                anchors.leftMargin: 15
                 fillMode: Image.PreserveAspectFit
                 cache: false
                 asynchronous: false
@@ -144,8 +92,8 @@ Item {
                 sourceSize.height: 480
                 // Reload image
                 function reload(){
-//                    source = ""
-                    source = "image://live/image1?" + Date.now()
+                    source = ""
+                    source = "image://live/image1/" + Date.now()
                 }
                 // Set default image
                 function setDefault(){
@@ -467,12 +415,9 @@ Item {
 
     Connections {
         target: liveImageProvider
-        function onImageChanged(camIndex) {
-            if(camIndex === 0){
-                imageRGB.reload()
-            }else if(camIndex === 1) {
-                imageIFR.reload()
-            }
+        function onImageChanged() {
+            imageRGB.reload()
+            imageIFR.reload()
         }
         Component.onDestruction: {
             controller.imageThreadFinished()
