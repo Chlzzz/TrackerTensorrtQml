@@ -5,8 +5,8 @@ ImageProcess::ImageProcess(QObject* parent) : QObject(parent) {
     m_nn_running = false;
     m_full_demo_running = false;
     is_init = false;
-//    m_infer = std::make_shared<AppRTdetr>();
-//    m_tracker = std::make_shared<AppOStrack>();
+    m_infer = std::make_shared<AppRTdetr>();
+    m_tracker = std::make_shared<AppOStrack>();
 }
 
 ImageProcess::~ImageProcess(){
@@ -56,6 +56,7 @@ QImage ImageProcess::MatImageToQImage(const cv::Mat& src) {
 
 void ImageProcess::initCapture(const std::string cameraIndex = "0", const double capWidth = 640,
     const double capHeight = 480) {
+    qDebug() << "***initcapture. ";
 #ifdef USE_VIDEO
     cap.open("./video/output.avi");
 #else
@@ -80,7 +81,7 @@ void ImageProcess::initCapture(const std::string cameraIndex = "0", const double
 
 
 void ImageProcess::readFrame() {
-
+    qDebug() << "***readframe. ";
     initCapture(m_camera_index.toStdString());
     
     std::string task_type = m_task_type.toStdString();
@@ -99,26 +100,26 @@ void ImageProcess::readFrame() {
         }
         else {
             // 模型推理部分
-//            if(m_nn_running && is_init) {
-//                if(task_type == "MOT") {
-//                    cv::Mat infer_frame;
-//                    infer_frame = m_infer->process_image_and_track(m_frame);
-//                    m_q_frame = MatImageToQImage(infer_frame);
-//                    emit sendImage(m_q_frame);
-//                }
-//                else if(task_type == "VOT") {
-//                    cv::Mat infer_frame;
-//                    infer_frame = m_tracker->process_image_and_track(m_frame);
-//                    m_q_frame = MatImageToQImage(infer_frame);
-//                    emit sendImage(m_q_frame);
-//                }
-//            }
-//            else {
-//                    m_q_frame = MatImageToQImage(m_frame);
-//                    emit sendImage(m_q_frame);
-//                }
-            m_q_frame = MatImageToQImage(m_frame);
-            emit sendImage(m_q_frame);
+           if(m_nn_running && is_init) {
+               if(task_type == "MOT") {
+                   cv::Mat infer_frame;
+                   infer_frame = m_infer->process_image_and_track(m_frame);
+                   m_q_frame = MatImageToQImage(infer_frame);
+                   emit sendImage(m_q_frame);
+               }
+               else if(task_type == "VOT") {
+                   cv::Mat infer_frame;
+                   infer_frame = m_tracker->process_image_and_track(m_frame);
+                   m_q_frame = MatImageToQImage(infer_frame);
+                   emit sendImage(m_q_frame);
+               }
+           }
+           else {
+                   m_q_frame = MatImageToQImage(m_frame);
+                   emit sendImage(m_q_frame);
+               }
+//            m_q_frame = MatImageToQImage(m_frame);
+//            emit sendImage(m_q_frame);
         }
     }
     cap.release();   
@@ -163,12 +164,12 @@ void ImageProcess::endCapture() {
         return ;
     }
 
-//    if(m_task_type == "MOT") {
-//        m_infer->call_create_infer(m_full_network_path.toStdString());
-//    }
-//    else if(m_task_type == "VOT") {
-//        m_tracker->call_create_tracker(m_full_network_path.toStdString());
-//    }
+   if(m_task_type == "MOT") {
+       m_infer->call_create_infer(m_full_network_path.toStdString());
+   }
+   else if(m_task_type == "VOT") {
+       m_tracker->call_create_tracker(m_full_network_path.toStdString());
+   }
     
     emit sendInferDeviceSuccess();
  }
@@ -176,13 +177,13 @@ void ImageProcess::endCapture() {
 
  void ImageProcess::changeNNStatus(){
     std::string task_type = m_task_type.toStdString();
-//    if(task_type == "MOT") {
-//        int fps = cap.get(CAP_PROP_FPS);
-//        m_infer -> tracker_init(fps, 30);
-//        is_init = true;
-//    }
-//    else if(task_type == "VOT") {
-//        m_tracker->init_tracker(m_frame, init_bbox);
-//    }
+   if(task_type == "MOT") {
+       int fps = cap.get(CAP_PROP_FPS);
+       m_infer -> tracker_init(fps, 30);
+       is_init = true;
+   }
+   else if(task_type == "VOT") {
+       m_tracker->init_tracker(m_frame, init_bbox);
+   }
     m_nn_running = !m_nn_running;
  }

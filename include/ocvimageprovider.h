@@ -10,22 +10,21 @@
 #ifdef _DEBUG
     #include <QDebug>
 #endif
-
-class OCVImageProvider : public QObject, public QQuickImageProvider {
+class OCVImageProvider : public QObject, public QQuickImageProvider
+{
     Q_OBJECT
-
 public:
-    explicit OCVImageProvider(QObject* parent = nullptr);
-    QImage requestImage(const QString& id, QSize* size, const QSize& requestedSize) override;
+    explicit OCVImageProvider(QObject *parent = nullptr);
+    QImage requestImage(const QString &id, QSize *size, const QSize &requestedSize) override;
+
 
 public slots:
-    void updateImage(const QImage& image, int camIndex);
-
+    void updateImage(const QImage &image);
 signals:
-    void imageChanged(int camIndex);
+    void imageChanged();
 
 private:
-    QImage image1, image2;
+    QImage image;
     QMutex mutex;
 };
 
