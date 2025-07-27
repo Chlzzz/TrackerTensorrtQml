@@ -88,8 +88,8 @@ void ImageProcess::initCapture(const double capWidth = 640,
             if (cap.isOpened()) cap.release();
         }
 
-        cv::VideoCapture cap;
         for(const auto& element : m_source_array) {
+            cv::VideoCapture cap;
             if(element.m_source_type == "USB") {
                 cap.open(std::stoi(element.m_source), cv::CAP_ANY);
     //            cap.open(std::stoi(element.m_source), cv::CAP_V4L2);
@@ -122,9 +122,9 @@ bool ImageProcess::grabFrame(size_t currentid) {
 
     bool is_empty = false;
     bool is_vector_empty = true;
-    cv::Mat m_frame;
+    m_mat_array.clear();
     if(m_source_array[0].m_source_type == "DIR") {
-        m_mat_array.clear();
+        cv::Mat m_frame;
         for(int i = 0; i < m_dir_array.size(); ++i) {
             if(currentid >= m_dir_array[i].size()) {
                 is_empty = true;
@@ -136,13 +136,12 @@ bool ImageProcess::grabFrame(size_t currentid) {
     }
     else {
         for(int i = 0; i < m_cap_array.size(); ++i) {
+            cv::Mat m_frame;
             m_cap_array[i].read(m_frame);
-//            if(m_source_array[i].m_source_type == "VID") {
-//                cv::waitKey(33);
-//            }
             if(m_frame.empty()) {
                 m_cap_array[i].release();
                 is_empty = true;
+                break;
             }
             m_mat_array.emplace_back(std::move(m_frame));
         }
@@ -188,7 +187,7 @@ void ImageProcess::readFrame() {
             emit sendImage(m_q_frame, i);
         }
 
-        if(m_cap_array.size() != 0) {
+        if(m_cap_array.size() == 0) {
             for(auto& cap : m_cap_array) {
                 if (cap.isOpened()) cap.release();
             }
