@@ -217,7 +217,7 @@ void ImageProcess::endCapture() {
 }
 
 
- void ImageProcess::initengine(QStringList capturePara, QStringList inferPara) {
+ void ImageProcess::initengine(std::vector<QStringList>& capturePara, QStringList inferPara) {
 
      QFileInfo fileInfo(inferPara[1]);
      if(!fileInfo.exists()) {
@@ -234,9 +234,9 @@ void ImageProcess::endCapture() {
     m_full_network_path = inferPara[1].toStdString();
     m_task_type = inferPara[2].toStdString();
     sourcePara sp;
-    for(int i = 0; i != capturePara.size() / 2; ++i) {
-        sp.m_source_type = capturePara[2 * i].toStdString();
-        sp.m_source = capturePara[2 * i + 1].toStdString();
+    for(int i = 0; i != capturePara.size(); ++i) {
+        sp.m_source_type = capturePara[i][0].toStdString();
+        sp.m_source = capturePara[i][1].toStdString();
         m_source_array.emplace_back(std::move(sp));
     }
 

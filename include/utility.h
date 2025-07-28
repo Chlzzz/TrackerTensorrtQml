@@ -9,6 +9,7 @@
 #include <QJSValue>
 #include <QFile>
 #include <QDir>
+#include <QVariantList>
 
 #ifdef _DEBUG
     #include <QDebug>
@@ -31,13 +32,13 @@ public:
 signals:
     void engineStatusChanged(const bool engineStatus);
     void errorMessageChanged(const QString errorMessage);
-    void sendToThread( QStringList capturePara,  QStringList inferPara);
+    void sendToThread( std::vector<QStringList>& capturePara,  QStringList inferPara);
 
 public slots:
     void setEngineStatus(const bool engineStatus);
     void setErrorMessage(const QString errorMessage);
 
-    void parseJSValue(QJSValue jsValue);
+    void parseJSValue(QJSValue jsValue, const QVariantList& cameraData);
 
     void receivedEngineStatusCorrect(QString status);
     void receivedEngineStatusFalse(QString status);

@@ -5,12 +5,13 @@ import QtQuick.Dialogs 1.3
 import Qt.labs.platform 1.1
 
 Item {
-    id: sourceSelect
+    id: cameraForm
     width: 250  // 显式设置宽度（根据内容调整）
     height: 40  // 显式设置高度（ComboBox 高度 + 边距）
 
-    property var paraList
-    property bool is_source0
+    // 定义可外部访问的属性
+    property string cameraType: "USB"
+    property string cameraId: "0"
 
     // 左边的 ComboBox
     ComboBox {
@@ -25,9 +26,9 @@ Item {
         model: ["USB", "RTSP", "VID", "DIR"]
         currentIndex: 0
         onCurrentIndexChanged: {
+            cameraForm.cameraType = model[currentIndex]
             // 根据选项切换 Item A 和 Item B 的可见性
-            usbComboBox.visible = (currentIndex === 0);
-            rtspInput.visible = (currentIndex === 1);
+            camAddress.visible = (currentIndex === 0 || currentIndex === 1);
             fileSelect.visible = (currentIndex === 2 || currentIndex === 3)
         }
     }
@@ -41,49 +42,11 @@ Item {
         width:120
         height:35
         // USB 模式下的 ComboBox
-        ComboBox {
-            id: usbComboBox
-            anchors.fill: parent
-            font.pixelSize: 12
-            font.family: "Fredoka Light"
-            model: [0, 1, 2, 3, 4, 5]
-            currentIndex: 0
-            visible: true // 默认显示
-            onCurrentIndexChanged: {
-                if (visible === true && is_source0 === true) {
-                    paraList["source0"] = displayText
-                    paraList["source0_type"] = camTypeBox.displayText
-                } else if (visible === true) {
-                    paraList["source1"] = displayText
-                    paraList["source1_type"] = camTypeBox.displayText
-                }
-            }
-        }
-
-        Rectangle {
-            id: rtspInput
-            color: "#E8E8E8"
-            anchors.fill: parent
-            visible: false // 默认隐藏
-            // RTSP 模式下的 TextInput
-            TextInput {
-                id: rtspAddress
-                anchors.fill: parent // 填充整个 Rectangle
-                anchors.margins: 5 // 设置边距
-                verticalAlignment: Text.AlignVCenter // 垂直居中
-                font.pixelSize: 12
-                font.family: "Fredoka Light"
-                text: qsTr("192.168.")
-                onTextChanged: {
-                    if (visible === true && is_source0 === true) {
-                        paraList["source0"] = displayText
-                        paraList["source0_type"] = camTypeBox.displayText
-                    }else if (visible === true) {
-                        paraList["source1"] = displayText
-                        paraList["source1_type"] = camTypeBox.displayText
-                    }
-                }
-            }
+        TextField {
+            id: camAddress
+            text: cameraForm.cameraId
+            onEditingFinished: cameraForm.cameraId = text
+            width: parent.width
         }
 
         Item{
@@ -127,13 +90,7 @@ Item {
                 onAccepted: {
                     var url = networkFolderDialog.file
                     fileDir.text = url.toString().slice(7)
-                    if (is_source0 === true) {
-                        paraList["source0"] = fileDir.text
-                        paraList["source0_type"] = camTypeBox.displayText
-                    } else {
-                        paraList["source1"] = fileDir.text
-                        paraList["source1_type"] = camTypeBox.displayText
-                    }
+                    cameraForm.cameraId = fileDir.text
                 }
                 onRejected: {
                     fileDir.text = qsTr("Must provide a valid folder path...")
@@ -142,17 +99,5 @@ Item {
         }
     }
 
-//    Button {00
-//       text: "Save"
-//       font.pixelSize: 12
-//       font.family: "Fredoka Light"
-//       width:50
-//       height: 35
-//       anchors.left: sourceComponent.right
-//       anchors.verticalCenter: sourceComponent.verticalCenter
-//       onClicked: {
-//           localParaList = JSON.parse(JSON.stringify(paraList));
-//           paraListArray.push(localParaList);
-//       }
-//    }
+
 }

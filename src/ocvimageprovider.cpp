@@ -3,7 +3,7 @@
 OCVImageProvider::OCVImageProvider(QObject *parent) : QObject(parent),
         QQuickImageProvider(QQuickImageProvider::Image) {
     image0 = QImage(":/assets/help.png");
-//    image1 = QImage(":/assets/help.png");
+    image1 = QImage(":/assets/help.png");
 }
 
 QImage OCVImageProvider::requestImage(const QString &id, QSize *size, const QSize &requestedSize) {

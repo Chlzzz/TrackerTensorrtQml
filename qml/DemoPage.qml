@@ -2,6 +2,7 @@ import QtQuick 2.15
 import QtCharts 2.15
 import QtQuick.Controls 2.15
 
+import QtQuick.Layouts 1.15
 import QtQuick.Dialogs 1.3
 import Qt.labs.platform 1.1
 
@@ -20,22 +21,32 @@ Item {
         color: "transparent"
 
         property var paraList: {
-            "source_mode": "DUAL",
-            "source0_type": "USB",
-            "source0": "0",
-            "source1_type": "USB",
-            "source1": "0",
             "infer_device": "Nvidia GPU",
             "task_type": "MOT",
             "network": ""
         }
 
-        function stringifyAndSend(paraList){
+        // 存储所有Camera信息的模型
+        ListModel {
+            id: maincameraModel
+        }
+
+        function stringifyAndSend(paraList, caminfo){
             var jsonString = JSON.stringify(paraList)
             console.log(jsonString)
-            console.log("Send to C++")
-            // balabala send!
-            utility.parseJSValue(paraList)
+
+            var cameraData = [];
+            for (var i = 0; i < caminfo.count; i++) {
+                var item = caminfo.get(i);
+                cameraData.push({
+                    type: item.type,       // 访问 Q_PROPERTY
+                    cameraId: item.cameraId
+                });
+            }
+            var jsonStr = JSON.stringify(cameraData);
+            console.log(jsonStr)
+
+            utility.parseJSValue(paraList, cameraData)
         }
 
 
@@ -103,7 +114,7 @@ Item {
         }
 
 
-         Rectangle {
+        Rectangle {
             id: controlCamPanel
             height: 120
             color: "#ffffff"
@@ -112,33 +123,83 @@ Item {
             anchors.right: parent.right
             anchors.top: canvas.top
 
-            Text {
-                id: cameraText
-                text: qsTr("Source")
-                anchors.top: parent.top
-                anchors.topMargin: 10
-                anchors.horizontalCenter: parent.horizontalCenter
-                font.pixelSize: 15
-                font.family: "Fredoka Light"   
-            }
 
-            Rectangle {
-                anchors.top: cameraText.bottom
-                height: 90
-                width: parent.width
-                Column {
-                    id: camcol
-                    spacing: 2
-                    SourceSelect{
-                        paraList: demoContent.paraList
-                        is_source0: true
+            property var cameraForms: []
+
+            ColumnLayout {
+                anchors.fill: parent
+                spacing: 10
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 10
+                    Layout.leftMargin: 15
+
+                    Label {
+                        text: "Source Info"
+                        font.pixelSize: 18
+                        Layout.alignment: Qt.AlignLeft
                     }
-                    SourceSelect{
-                        paraList: demoContent.paraList
-                        is_source0: false
+
+                    Button {
+                        text: "Add"
+                        onClicked: controlCamPanel.addCameraInfo()
+                        Layout.alignment: Qt.AlignRight
+                    }
+
+                    Button {
+                        text: "Save"
+                        onClicked: controlCamPanel.saveCameraInfo()
+                        Layout.alignment: Qt.AlignRight
+                    }
+                }
+
+                ScrollView {
+                    id: mainScrollView
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    clip: true
+
+                    Column {
+                        id: formsContainer
+                        width: mainScrollView.width
+                        spacing: 10
+//                        padding: 10
                     }
                 }
             }
+
+            // 添加新的Camera信息表单(ListView)
+            function addCameraInfo() {
+                var component = Qt.createComponent("CameraForm.qml")
+                if (component.status === Component.Ready) {
+                    var newForm = component.createObject(formsContainer, {
+                        "width": formsContainer.width - 20
+                    })
+                     cameraForms.push(newForm)
+                } else {
+                    console.error("Error creating component:", component.errorString())
+                }
+            }
+
+            function saveCameraInfo() {
+                // 清空主模型
+                maincameraModel.clear()
+
+                cameraForms.forEach(function(form) {
+                    maincameraModel.append({
+                        "type": form.cameraType,
+                        "cameraId": form.cameraId,
+                    })
+                })
+
+            }
+
+            Component.onCompleted: {
+                // 初始添加一个表单
+                addCameraInfo()
+            }
+
          }
 
          Rectangle {
@@ -174,7 +235,7 @@ Item {
                 font.family: "Fredoka Light"
                 model: ["Nvidia GPU", "Intel CPU"]
                 onDisplayTextChanged: {
-                     demoContent.paraList["infer_device"] = displayText
+                    demoContent.paraList["infer_device"] = displayText
                 }
             }
 
@@ -256,6 +317,7 @@ Item {
                     }
                 }
             }
+
             FileDialog {
                 id: networkFolderDialog
                 property string url: ""
@@ -285,7 +347,8 @@ Item {
                     // This button slot function:
                     // 1. stringify js/qml object file and send to C++ backend
                     // 2. check the parameters, return status from C++
-                    demoContent.stringifyAndSend(demoContent.paraList)
+
+                    demoContent.stringifyAndSend(demoContent.paraList, maincameraModel)
 
                     checkParameter()
                 }

@@ -41,40 +41,35 @@ void Utility::receivedEngineStatusFalse(QString status) {
 //"task_type": "Detection",
 //"network_directory": "./"
 
-void Utility::parseJSValue(QJSValue jsValue) {
+void Utility::parseJSValue(QJSValue jsValue, const QVariantList& cameraData) {
     QJsonObject jsonObject = jsValue.toVariant().toJsonObject();
-    QString sourceMode = jsonObject.value("source_mode").toString();
-    QString source0Type = jsonObject.value("source0_type").toString();
-    QString source0 = jsonObject.value("source0").toString();
-    QString source1Type = jsonObject.value("source1_type").toString();
-    QString source1 = jsonObject.value("source1").toString();
+
     QString inferDevice = jsonObject.value("infer_device").toString();
     QString NetworkDir = jsonObject.value("network_directory").toString();
     QString TaskType = jsonObject.value("task_type").toString();
-
-    QStringList capturePara;
-//    capturePara.push_back(sourceMode);
-    capturePara.push_back(source0Type);
-    capturePara.push_back(source0);
-    capturePara.push_back(source1Type);
-    capturePara.push_back(source1);
-
     QStringList inferPara;
     inferPara.push_back(inferDevice);
     inferPara.push_back(NetworkDir);
     inferPara.push_back(TaskType);
 
-    emit sendToThread(capturePara, inferPara);
+    std::vector<QStringList> camPara;
+    camPara.reserve(cameraData.size());
+    for (const QVariant &item : cameraData) {
+        QVariantMap cameraInfo = item.toMap();
+        QStringList caminfo;
+        caminfo.append(cameraInfo["type"].toString());
+        caminfo.append(cameraInfo["cameraId"].toString());
+        camPara.push_back(caminfo);
+    }
+
+    emit sendToThread(camPara, inferPara);
 
 #ifdef _DEBUG
 // uncomment the following debug to match the result if something went sideway
-//    qDebug() << "cameraType is: " << cameraType;
-//    qDebug() << "cameraDevice is: " << cameraDevice;
     qDebug() << "infer device is: " << inferDevice;
     qDebug() << "NetworkDir is: " << NetworkDir;
     qDebug() << "TaskType is: " << TaskType;
-    qDebug() << "capturePara is: " << capturePara;
-    qDebug() << "inferPara is: " << inferPara;
+//    qDebug() << "camPara is: " << camPara[0];
 // In addition, in debug mode, a debug json file is generated.
     QString headerInfo = QString("// This json file is automatically generated for debug.\n%1 %2")
             .arg("// Generated time:")

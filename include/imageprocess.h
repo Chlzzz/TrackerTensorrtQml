@@ -52,7 +52,7 @@ public slots:
     bool grabFrame(size_t currentid);
     void endCapture();
 
-    void initengine(QStringList capturePara, QStringList inferPara);
+    void initengine(std::vector<QStringList>& capturePara, QStringList inferPara);
 
 //    void checkInferParameter(QStringList capturePara, QStringList inferPara);
     void changeNNStatus();
