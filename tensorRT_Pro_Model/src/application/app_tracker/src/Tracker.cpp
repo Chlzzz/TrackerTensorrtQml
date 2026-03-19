@@ -1,10 +1,16 @@
 #include "Tracker.hpp"
+#include "OSTrack.hpp"
+#include "BAT.hpp"
+
+#include <vector>
+#include "infer/trt_infer.hpp"
+#include "common/ilogger.hpp"
 
 namespace VOT {
 
-    vector<float> Tracker::gen_window(int sz) {
-        vector<float> hann1d(sz);
-        vector<float> hann2d(sz * sz);
+    std::vector<float> Tracker::gen_window(int sz) {
+        std::vector<float> hann1d(sz);
+        std::vector<float> hann2d(sz * sz);
         for (int i = 1; i < sz + 1; ++i) {
             float w = 0.5f - 0.5f * std::cos(2 * 3.1415926535898f * i / float(sz+1) );
             hann1d[i-1] = w;
@@ -53,6 +59,26 @@ namespace VOT {
             cv::resize(img_patch_roi, dst, cv::Size(model_sz, model_sz));
 
             resize_factor = float(model_sz) / float(crop_sz);
+    }
+
+    std::shared_ptr<Tracker> Tracker::create_tracker(const std::string &engine_path, int gpuid = 0) {
+        if(engine_path.find("OSTrack") != std::string::npos){
+            std::shared_ptr<TrackerImpl> instance(new TrackerImpl{});
+            if(!instance->startup(engine_path, gpuid))
+                instance.reset();
+            return instance;
         }
+        else if(engine_path.find("BAT") != std::string::npos){
+            std::shared_ptr<TrackerImpl> instance(new TrackerImpl{});
+            if(!instance->startup(engine_path, gpuid))
+                instance.reset();
+            return instance;
+        }
+        else{
+            LOGE("unsupported tracker type, only support OSTrack and BAT");
+            return nullptr;
+        }
+    }
+    
     
 }

@@ -11,7 +11,7 @@ namespace OSTrack {
     
     ~TrackerImpl() = default;
 
-    bool TrackerImpl::startup(const std::string &engine_path, int gpuid){
+    bool TrackerImpl::startup(const std::string &engine_path, int gpuid) {
         gpu_ = gpuid;
         TRT::set_device(gpuid);
 
@@ -26,7 +26,7 @@ namespace OSTrack {
         return true;
     }
 
-    void TrackerImpl::init(cv::Mat &z_img, cv::Rect &init_bbox) override{
+    void TrackerImpl::init(cv::Mat &z_img, cv::Rect &init_bbox) override {
         target_bbox_ = init_bbox;
         zin_ = infer_model_->input(0);
         int z_in_h = zin_->shape(2);
@@ -47,7 +47,7 @@ namespace OSTrack {
         zin_->set_norm_mat_invert(0, z_patch, m, std);
     }
 
-    cv::Rect TrackerImpl::track(cv::Mat& x_img) override{
+    cv::Rect TrackerImpl::track(cv::Mat& x_img) override {
         cv::Mat x_patch;
         float resize_factor = 1.f;
         cropSubImg(x_img, x_patch, search_factor_, search_size_, resize_factor);
@@ -112,14 +112,7 @@ namespace OSTrack {
         target_bbox_.height = std::max(5, std::min(x_img.rows, target_bbox_.height));
 
         return target_bbox_;
-        } 
+    } 
 
-
-    shared_ptr<Tracker> create_tracker(const std::string &engine_path,int gpuid){
-        shared_ptr<TrackerImpl> instance(new TrackerImpl{});
-        if(!instance->startup(engine_path, gpuid))
-            instance.reset();
-        return instance;
-    }
 
 }

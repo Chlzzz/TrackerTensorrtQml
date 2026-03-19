@@ -114,8 +114,8 @@ namespace BAT {
 
     
 
-    shared_ptr<Tracker> create_tracker(const std::string &engine_path,int gpuid){
-        shared_ptr<TrackerImpl> instance(new TrackerImpl{});
+    std::shared_ptr<Tracker> create_tracker(const std::string &engine_path,int gpuid){
+        std::shared_ptr<TrackerImpl> instance(new TrackerImpl{});
         if(!instance->startup(engine_path, gpuid))
             instance.reset();
         return instance;

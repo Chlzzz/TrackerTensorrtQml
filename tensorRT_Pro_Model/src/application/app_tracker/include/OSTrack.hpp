@@ -2,7 +2,7 @@
 
 namespace OSTrack{
     
-    class TrackerImpl : public Tracker{
+    class TrackerImpl : public VOT::Tracker{
     public:
         ~TrackerImpl() = default;
         
@@ -18,15 +18,15 @@ namespace OSTrack{
         int template_size_ = 128; //192
         int search_size_ = 256; // 384
         int feat_sz_ = 16; // 24
-        vector<float> han_window_;
+        std::vector<float> han_window_;
         cv::Rect target_bbox_; // 目标框
 
-        shared_ptr<TRT::Infer> infer_model_;
-        shared_ptr<TRT::Tensor> zin_;
-        shared_ptr<TRT::Tensor> xin_;
-        shared_ptr<TRT::Tensor> score_map_;
-        shared_ptr<TRT::Tensor> size_map_;
-        shared_ptr<TRT::Tensor> offset_map_;
+        std::shared_ptr<TRT::Infer> infer_model_;
+        std::shared_ptr<TRT::Tensor> zin_;
+        std::shared_ptr<TRT::Tensor> xin_;
+        std::shared_ptr<TRT::Tensor> score_map_;
+        std::shared_ptr<TRT::Tensor> size_map_;
+        std::shared_ptr<TRT::Tensor> offset_map_;
         TRT::CUStream stream_ = nullptr;
         int gpu_ = 0;
     }

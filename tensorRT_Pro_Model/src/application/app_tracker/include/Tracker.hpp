@@ -16,10 +16,10 @@ namespace VOT {
     };
 
     std::vector<float> gen_window(int sz);
-    void cropSubImg(const cv::Mat& img, cv::Mat& dst, float area_factor, int model_sz, float& resize_factor) const;
+    void cropSubImg(const cv::Mat& img, cv::Mat& dst, float area_factor, int model_sz, float& resize_factor);
 
     std::shared_ptr<Tracker> create_tracker(const std::string &engine_path, int gpuid = 0);
- 
+        
 }
 
 
