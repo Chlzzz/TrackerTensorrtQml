@@ -59,7 +59,7 @@ namespace OSTrack {
         xin_->set_norm_mat_invert(0, x_patch, m, std);
 
         // 绑定输出
-        score_map_ = infer_model_->output(1);
+        score_map_ = infer_model_->output(1)
         size_map_ = infer_model_->output(2);
         offset_map_ = infer_model_->output(0);
 

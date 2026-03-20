@@ -279,10 +279,10 @@ void run_sequence(const std::string& engine_path,
     }
 
 
-int main(int argc, char* argv[]) {
+int app_bat(std::string engine_path, std::string dataset) {
     
-    std::string engine_path = (argc > 1) ? argv[1] : "";
-    std::string dataset_name = (argc > 2) ? argv[2] : "RGBT234";
+    std::string engine_path = engine_path;
+    std::string dataset_name = dataset;
     std::string seq_home;
     
     if(dataset_name == "RGBT234") {

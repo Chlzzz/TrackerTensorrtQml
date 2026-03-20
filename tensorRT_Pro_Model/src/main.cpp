@@ -7,21 +7,19 @@
 
 int app_rtdetr();
 int app_ostrack(std::string camid, std::string path);
+int app_bat(std::string engine_path, std::string dataset);
 
 int main(int argc, char** argv){
     
+    std::string engine_path = (argc > 1) ? argv[1] : "";
+    std::string dataset_name = (argc > 2) ? argv[2] : "RGBT234";
+    
 
-    const char* method = "ostrack";
-    if(argc > 1){
-        method = argv[1];
+    if(engine_path.find("BAT") != std::string::npos) {
+        app_bat(engine_path, dataset_name);
     }
-
-    if(strcmp(method, "ostrack") == 0){
-    	app_ostrack(argv[2], argv[3]);
-    }else if(strcmp(method, "rtdetr") == 0){
-        app_rtdetr();
-    }else{
-        printf("Unknow method: %s\n", method);
+    else {
+        printf("Unknow method: %s\n", engine_path);
         printf(
             "Help: \n"
             "    ./pro method like [yolo、yolo_cls、yolo_seg、yolo_pose、test_yolo_map]\n"
